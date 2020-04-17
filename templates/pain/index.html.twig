@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pain index{% endblock %}
+
+{% block body %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Liste des pains</h3>
+                <div class="card-tools">
+                    <a href="{{ path('pain_new') }}" class="btn btn-tool btn-sm">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Poid</th>
+                            <th>Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for pain in pains %}
+                        
+                        <tr onclick="document.location = '{{ path('pain_edit', {'id': pain.id}) }}';">
+                            <td>{{ pain.nom }}</td>
+                            <td>{{ pain.poid |number_format(2, ',', '.')}} kg</td>
+                            <td>{{ pain.prix |number_format(2, ',', '.')}} €</td>
+                        </tr>
+                        
+                    {% else %}
+                        <tr>
+                            <td colspan="5">Ya pas de pain ! </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+        
+{% endblock %}
+
+{% block navbar %}
+    <li class="nav-item d-none d-sm-inline-block">
+        <a href="{{ path('pain_new') }}" class="nav-link">Ajouter un pain</a>
+    </li>
+{% endblock %}

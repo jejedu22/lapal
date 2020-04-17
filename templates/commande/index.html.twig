@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commandes{% endblock %}
+
+{% block body %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Liste des commandes</h3>
+                <div class="card-tools">
+                    <a href="{{ path('commande_new') }}" class="btn btn-tool btn-sm">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+
+                {% for commande in commandes %}
+                <div class="card card-teal card-outline">
+                    <div class="card-header">
+                        <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }}</h5>
+                        <div class="card-tools">
+                            <a href="{{ path('commande_edit', {'id': commande.id}) }}" class="btn btn-tool btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                    
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Poid</th>
+                                    <th>Quantite</th>
+                                    <th>Prix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set total = 0 %}
+                            {% for ligne in commande.lignecommandes %}
+                                {% set somme = ligne.quantite*ligne.pain.prix %}
+                                {% set total = total+somme %}
+                                <tr>
+                                    <td>{{ ligne.pain.nom }}</td>
+                                    <td>{{ ligne.pain.poid }}</td>
+                                    <td>{{ ligne.quantite }}</td>
+                                    <td>{{ somme }}</td>
+                                </tr>
+                            {% endfor %}
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Total</td>
+                                    <td>{{ total }}€</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="card card-teal card-outline">
+                    <div class="card-body">
+                        <h5 class="card-title">Ya pas de commande, va te coucher !</h5>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block navbar %}
+    <li class="nav-item d-none d-sm-inline-block">
+        <a href="{{ path('commande_new') }}" class="nav-link">Ajouter une commande</a>
+    </li> 
+{% endblock %}

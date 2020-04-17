@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jours de distribution{% endblock %}
+
+{% block body %}
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Jours de distribution</h3>
+                <div class="card-tools">
+                    <a href="{{ path('jour_distrib_new') }}" class="btn btn-tool btn-sm">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for jour_distrib in jour_distribs %}
+                        <tr onclick="document.location = '{{ path('jour_distrib_edit', {'id': jour_distrib.id}) }}';">
+                            <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Fini le boulot !</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block navbar %}
+    <li class="nav-item d-none d-sm-inline-block">
+        <a href="{{ path('jour_distrib_new') }}" class="nav-link">Ajouter un jour</a>
+    </li>
+{% endblock %}

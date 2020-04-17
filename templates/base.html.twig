@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}LAPAL{% endblock %}</title>
+          
+        <!-- Font Awesome Icons -->
+        <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+        <!-- Google Font: Source Sans Pro -->
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        
+        {% block stylesheets %}
+        {% endblock %}
+        <!-- DatePicker -->
+        <link rel="stylesheet" href="{{asset('plugins/datepicker/datepicker3.css')}}">
+    </head>
+    <body>
+        <div class="wrapper">
+
+            <!-- Navbar -->
+            <nav class="main-header navbar navbar-expand navbar-dark navbar-teal">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                    </li>
+                    
+                    {% block navbar %}
+                    {% endblock %}
+                
+                </ul>
+
+                <!-- Right navbar links -->
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button"><i class="fas fa-th-large"></i></a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- /.navbar -->
+
+            <!-- Main Sidebar Container -->
+            <aside class="main-sidebar elevation-4 sidebar-dark-teal">
+                <!-- Brand Logo -->
+                <a href="index3.html" class="brand-link navbar-teal">
+                    <img src="/dist/img/lapallogo.png" alt="lapal Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                    <span class="brand-text font-weight-light">LAPAL</span>
+                </a>
+
+                <!-- Sidebar -->
+                <div class="nav-sidebar">
+
+                    <!-- Sidebar Menu -->
+                    <nav class="mt-2">
+                        <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent nav-flat" data-widget="treeview" role="menu" data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
+                            <li class="nav-item has-treeview menu-open">
+                                <a href="#" class="nav-link active">
+                                    <i class="nav-icon fas fa-tools"></i>
+                                    <p>
+                                        Administration
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
+
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="{{ path('pain_index') }}" class="nav-link active">
+                                            <i class="fas fa-bread-slice nav-icon"></i>
+                                            <p>Ajouter des pains</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('jour_distrib_index') }}" class="nav-link active">
+                                            <i class="far fa-calendar-alt nav-icon"></i>
+                                            <p>Jours de Distribution</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('ligne_commande_index') }}" class="nav-link active">
+                                            <i class="fas fa-list-ul nav-icon"></i>
+                                            <p>Liste des lignes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('commande_index') }}" class="nav-link active">
+                                            <i class="fas fa-list-ul nav-icon"></i>
+                                            <p>Liste des Commandes</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('commande_new') }}" class="nav-link active danger">
+                                    <i class="fas fa-shopping-bag nav-icon"></i>
+                                    <p>Passer Commandes</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                <!-- /.sidebar-menu -->
+                </div>
+            <!-- /.sidebar -->
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1 class="m-0 text-dark">Bienvenu sur le site de commande de La Place Au Levain</h1>
+                            </div><!-- /.col -->
+                        </div><!-- /.row -->
+                    </div><!-- /.container-fluid -->
+                </div>
+                <!-- /.content-header -->
+
+                <!-- Main content -->
+                <div class="content">
+                    <div class="container-fluid">
+                        <div class="row">
+
+                            {% block body %}
+                            {% endblock %}
+
+                        </div>
+                        <!-- /.row -->
+                    </div><!-- /.container-fluid -->
+                </div>
+                <!-- /.content -->
+            </div>
+            <!-- /.content-wrapper -->
+
+            <!-- Main Footer -->
+            <footer class="main-footer">
+            </footer>
+        </div>
+        <!-- ./wrapper -->
+
+        <!-- REQUIRED SCRIPTS -->
+
+        <!-- jQuery -->
+        <script src="/plugins/jquery/jquery.min.js"></script>
+        <!-- Bootstrap 4 -->
+        <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- AdminLTE App -->
+        <script src="/dist/js/adminlte.min.js"></script>
+        
+        <script src="{{asset('plugins/moment/min/moment-with-locales.min.js')}}"></script>
+        <!-- DateTimePicker -->
+        <script src="{{asset('plugins/datepicker/bootstrap-datepicker.js')}}"></script>
+        {# <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script> #}
+        {% block javascripts %}
+        {% endblock %}
+
+    </body>
+</html>

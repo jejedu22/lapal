@@ -1,0 +1,116 @@
+<?php
+
+namespace App\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\JourDistribRepository")
+ */
+class JourDistrib
+{
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $date;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Pain", inversedBy="jourDistribs")
+     */
+    private $pains;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Commande", mappedBy="jourDistrib")
+     */
+    private $commandes;
+
+    public function __construct()
+    {
+        $this->pains = new ArrayCollection();
+        $this->commandes = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8', 'fr.UTF8', 'fr_FR.UTF-8', 'fr.UTF-8');
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): self
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Pain[]
+     */
+    public function getPains(): Collection
+    {
+        return $this->pains;
+    }
+
+    public function addPain(Pain $pain): self
+    {
+        if (!$this->pains->contains($pain)) {
+            $this->pains[] = $pain;
+        }
+
+        return $this;
+    }
+
+    public function removePain(Pain $pain): self
+    {
+        if ($this->pains->contains($pain)) {
+            $this->pains->removeElement($pain);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Commande[]
+     */
+    public function getCommandes(): Collection
+    {
+        return $this->commandes;
+    }
+
+    public function addCommande(Commande $commande): self
+    {
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes[] = $commande;
+            $commande->setJourDistrib($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommande(Commande $commande): self
+    {
+        if ($this->commandes->contains($commande)) {
+            $this->commandes->removeElement($commande);
+            // set the owning side to null (unless already changed)
+            if ($commande->getJourDistrib() === $this) {
+                $commande->setJourDistrib(null);
+            }
+        }
+
+        return $this;
+    }
+}

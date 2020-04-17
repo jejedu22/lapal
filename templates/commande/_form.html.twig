@@ -1,0 +1,16 @@
+{{ form_start(form) }}
+    {# {{ form_row(form.description) }} #}
+
+    {{ form_row(form.nom) }}
+    {{ form_row(form.prenom) }}
+    
+    <ul class="ligneCommandes" data-prototype="{{ form_widget(form.ligneCommandes.vars.prototype)|e('html_attr') }}">
+        {% for ligne in form.ligneCommandes %}
+            <li>{{ form_row(ligneCommandes.pains) }}</li>
+        {% endfor %}
+    </ul>
+    {{ form_row(form.jourDistrib) }}
+    
+    {{ form_widget(form) }}
+    <button class="btn btn-block btn-success">{{ button_label|default('Enregistrer') }}</button>
+{{ form_end(form) }}
