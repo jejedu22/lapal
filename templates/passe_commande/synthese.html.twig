@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Sythèse des commandes par date{% endblock %}
+
+{% block body %}
+<div class="col-md-8">
+    <div class="card">
+        <div class="card-header border-transparent">
+            <h3 class="card-title">Sythèse des commandes par date</h3>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+        {% for jour_distrib in jour_distribs %}
+
+            <div class="card">
+                <div class="card-header border-transparent">
+                    <h3 class="card-title">{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</h3>
+                    <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table m-0">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Quantite</th>
+                                    <th>Pain</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for commande in jour_distrib.commandes%}
+                                {% for ligne in commande.ligneCommandes %}
+                                <tr>
+                                    <td>{{ commande.prenom }} {{ commande.nom }}</td>
+                                    <td>{{ ligne.quantite}} </td>
+                                    <td>{{ ligne.pain.nom }} - {{ ligne.pain.poid }}kg </td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block navbar %}
+
+{% endblock %}

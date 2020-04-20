@@ -80,21 +80,21 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ path('ligne_commande_index') }}" class="nav-link active">
+                                        <a href="{{ path('synthese_index') }}" class="nav-link active">
                                             <i class="fas fa-list-ul nav-icon"></i>
-                                            <p>Liste des lignes</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('commande_index') }}" class="nav-link active">
-                                            <i class="fas fa-list-ul nav-icon"></i>
-                                            <p>Liste des Commandes</p>
+                                            <p>Synthèse par date</p>
                                         </a>
                                     </li>
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ path('commande_new') }}" class="nav-link active danger">
+                                <a href="{{ path('commande_index') }}" class="nav-link active danger">
+                                    <i class="fas fa-list-ul nav-icon"></i>
+                                    <p>Liste des Commandes</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ path('passe_commande_index') }}" class="nav-link active danger">
                                     <i class="fas fa-shopping-bag nav-icon"></i>
                                     <p>Passer Commandes</p>
                                 </a>
@@ -124,6 +124,15 @@
                 <div class="content">
                     <div class="container-fluid">
                         <div class="row">
+                            {% for label, messages in app.flashes %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ label }} alert-dismissible">
+                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                        <h4><i class="icon fa fa-warning"></i> {{ label|trans }} </h4>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
 
                             {% block body %}
                             {% endblock %}

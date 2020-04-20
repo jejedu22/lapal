@@ -6,9 +6,9 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Liste des commandes</h3>
+                <h3 class="card-title">Liste des commandes en cours</h3>
                 <div class="card-tools">
-                    <a href="{{ path('commande_new') }}" class="btn btn-tool btn-sm">
+                    <a href="{{ path('passe_commande_index') }}" class="btn btn-tool btn-sm">
                         <i class="fas fa-plus"></i>
                     </a>
                 </div>
@@ -17,13 +17,12 @@
             <div class="card-body">
 
                 {% for commande in commandes %}
+                {% if commande.jourDistrib.date|date('Y-m-d') >= "now"|date('Y-m-d') %}
                 <div class="card card-teal card-outline">
                     <div class="card-header">
-                        <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }}</h5>
+                        <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }} {{ commande.jourDistrib.date|format_datetime('full', 'none', locale='fr') }}</h5>
                         <div class="card-tools">
-                            <a href="{{ path('commande_edit', {'id': commande.id}) }}" class="btn btn-tool btn-sm">
-                                <i class="fas fa-edit"></i>
-                            </a>
+                            {{ include('commande/_delete_form.html.twig') }}
                         </div>
                     </div>
                     <div class="card-body">
@@ -59,7 +58,7 @@
                         </table>
                     </div>
                 </div>
-
+                {% endif %}
                 {% else %}
                 <div class="card card-teal card-outline">
                     <div class="card-body">
@@ -74,6 +73,6 @@
 
 {% block navbar %}
     <li class="nav-item d-none d-sm-inline-block">
-        <a href="{{ path('commande_new') }}" class="nav-link">Ajouter une commande</a>
+        <a href="{{ path('passe_commande_index') }}" class="nav-link">Passer une commande</a>
     </li> 
 {% endblock %}

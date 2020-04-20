@@ -29,9 +29,19 @@ class JourDistrib
     private $pains;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Commande", mappedBy="jourDistrib")
+     * @ORM\OneToMany(targetEntity="App\Entity\Commande", mappedBy="jourDistrib", cascade={"persist", "remove"})
      */
     private $commandes;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $total;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $poidRestant;
 
     public function __construct()
     {
@@ -110,6 +120,39 @@ class JourDistrib
                 $commande->setJourDistrib(null);
             }
         }
+
+        return $this;
+    }
+    public function __toString() {
+        // to show the name of the Category in the select
+        if(is_null($this->date)) {
+            return 'NULL';
+        }  
+        return gettype($this->date);
+        // to show the id of the Category in the select
+        // return $this->id;
+    }
+
+    public function getTotal(): ?float
+    {
+        return $this->total;
+    }
+
+    public function setTotal(float $total): self
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    public function getPoidRestant(): ?float
+    {
+        return $this->poidRestant;
+    }
+
+    public function setPoidRestant(?float $poidRestant): self
+    {
+        $this->poidRestant = $poidRestant;
 
         return $this;
     }

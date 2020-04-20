@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Commande;
+use App\Entity\Pain;
 use App\Entity\LigneCommande;
 use App\Entity\JourDistrib;
 use Symfony\Component\Form\AbstractType;
@@ -12,44 +13,65 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+
+use App\Repository\JourDistribRepository;
 
 class CommandeType extends AbstractType
-{
+{    
+    private $jourDistribRepository;
+
+    public function __construct(JourDistribRepository $jourDistribRepository)
+    {
+        $this->jourDistribRepository = $jourDistribRepository;
+    }
+
+    
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
         $builder
+            ->add('jourDistrib', EntityType::class, [
+                'class' => JourDistrib::class,
+                'choice_label' => 'id',
+                'choices' => [$options['jourDistrib']],
+                'attr' => ['class' => 'd-none'],
+                'label' => false,
+            ])
             ->add('nom', TextType::class, [
                 'label' => 'Nom : ',
+                'required' => true,
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom : ',
-            ])
+                'required' => true,            ])
             ->add('ligneCommandes', CollectionType::class, [
                 'entry_type'   => LigneCommandeType::class,
-                'entry_options' => ['label' => false],
+                'entry_options' => ['label' => false, 'pains' => $options['pains']],
+                'label' => false,
                 'allow_add'    => true,
                 'allow_delete' => true,
                 'prototype'    => true,
-                'required'     => false,
-                'by_reference' => true,
+                'required'     => true,
+                'by_reference' => false,
                 'delete_empty' => true,
-                'attr'         => [
-                    'class' => 'doctrine-sample',
-                ],
             ])
-            ->add('jourDistrib', EntityType::class, [
-                'class' => JourDistrib::class,
-                'choice_label' => function (JourDistrib $jour = null) {
-                    return $jour->getDate()->format('l d F Y');
-                },
-                'choice_value' => 'id',
-            ]);
+            // ->addEventListener(FormEvents::PRE_SUBMIT, $listener);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => Commande::class,
+            'idJourDistrib' => 1,
+            'pains' => Pain::class,
+            'jourDistrib' => JourDistrib::class,
         ]);
+        $resolver->setAllowedTypes('idJourDistrib', 'int');
     }
 }

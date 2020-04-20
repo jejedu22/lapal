@@ -29,7 +29,7 @@ class Commande
     private $prenom;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\LigneCommande", mappedBy="commande", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="App\Entity\LigneCommande", mappedBy="commande", cascade={"persist", "remove"})
      */
     private $ligneCommandes;
 

@@ -33,8 +33,8 @@ class JourDistribController extends AbstractController
         $jourDistrib = new JourDistrib();
         $form = $this->createForm(JourDistribType::class, $jourDistrib);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($jourDistrib);
             $entityManager->flush();

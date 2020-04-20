@@ -8,6 +8,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class JourDistribType extends AbstractType
@@ -18,7 +19,7 @@ class JourDistribType extends AbstractType
             ->add('pains', EntityType::class, [
                 'class' => Pain::class,
                 'choice_label' => function (Pain $pain = null) {
-                    return $pain->getNom() . " " . $pain->getPoid();
+                    return $pain->getNom() . " - " . $pain->getPoid() . "kg";
                 },
                 'choice_value' => 'id',
                 'multiple' => true,
@@ -31,7 +32,10 @@ class JourDistribType extends AbstractType
                 'format' => 'dd/MM/yyyy',
                 'html5' => false,
             ])
-        ;
+            ->add('total', NumberType::class,[
+                'label' => 'Poid total de la fournée (en kg)'
+            ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver)

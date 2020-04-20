@@ -12,7 +12,7 @@
             <div class="card-body">
                 {{ include('commande/_form.html.twig') }}
 
-                <a href="{{ path('commande_index') }}"><i class="fas fa-angle-double-left"></i></a>
+                <button type="button" class="btn btn-block btn-danger" onclick="document.location = {{ path('passe_commande_index') }}">Annuler</button>
             </div>
         </div>
     </div>
@@ -24,7 +24,7 @@ var $collectionHolder;
 
 // setup an "add a ligne" link
 var $addLigneButton = $('<button type="button" class="btn btn-block btn-info">Ajouter un pain</button>');
-var $newLinkLi = $('<li></li>').append($addLigneButton);
+var $newLinkLi = $('<li class="list-group-item"></li>').append($addLigneButton);
 
 jQuery(document).ready(function() {
     // Get the ul that holds the collection of lignes
@@ -64,8 +64,9 @@ function addLigneCommandeForm($collectionHolder, $newLinkLi) {
     $collectionHolder.data('index', index + 1);
 
     // Display the form in the page in an li, before the "Add a ligne" link li
-    var $newFormLi = $('<li></li>').append(newForm);
+    var $newFormLi = $('<li class="list-group-item"></li>').append(newForm);
     $newLinkLi.before($newFormLi);
 }
 </script>
+
 {% endblock %}

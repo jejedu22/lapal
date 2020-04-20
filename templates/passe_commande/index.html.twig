@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choix du jours de distribution{% endblock %}
+
+{% block body %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Choix du jours de distribution</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Poid restant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for jour_distrib in jour_distribs %}
+                    {% if jour_distrib.poidRestant < jour_distrib.total and jour_distrib.date|date('Y-m-d') > "now"|date('Y-m-d') %}
+                        <tr onclick="document.location = '{{ path('passe_commande_new', {'idJourDistrib': jour_distrib.id}) }}';">
+                            <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
+                            <td>{{ jour_distrib.total - jour_distrib.poidRestant|default(0)}} kg</td>
+                        </tr>
+                    {% else %}
+                        <tr class="table-warning">
+                            <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
+                            <td>COMPLET</td>
+                        </tr>
+                    {% endif %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3">Fini le boulot !</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block navbar %}
+
+{% endblock %}

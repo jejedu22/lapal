@@ -22,7 +22,7 @@ class LigneCommandeRepository extends ServiceEntityRepository
     // /**
     //  * @return LigneCommande[] Returns an array of LigneCommande objects
     //  */
-    /*
+    /*    
     public function findByExampleField($value)
     {
         return $this->createQueryBuilder('l')
@@ -35,6 +35,7 @@ class LigneCommandeRepository extends ServiceEntityRepository
         ;
     }
     */
+    
 
     /*
     public function findOneBySomeField($value): ?LigneCommande
