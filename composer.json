@@ -8,6 +8,7 @@
         "almasaeed2010/adminlte": "~3.0",
         "ninsuo/symfony-collection": "dev-master",
         "sensio/framework-extra-bundle": "^5.5",
+        "symfony/apache-pack": "^1.0",
         "symfony/asset": "4.4.*",
         "symfony/console": "4.4.*",
         "symfony/debug": "^4.0",

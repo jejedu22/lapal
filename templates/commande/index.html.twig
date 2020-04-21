@@ -3,7 +3,7 @@
 {% block title %}Commandes{% endblock %}
 
 {% block body %}
-    <div class="col-md-6">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Liste des commandes en cours</h3>
@@ -25,9 +25,9 @@
                             {{ include('commande/_delete_form.html.twig') }}
                         </div>
                     </div>
-                    <div class="card-body">
-                    
-                        <table class="table">
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+
                             <thead>
                                 <tr>
                                     <th>Nom</th>
@@ -75,4 +75,29 @@
     <li class="nav-item d-none d-sm-inline-block">
         <a href="{{ path('passe_commande_index') }}" class="nav-link">Passer une commande</a>
     </li> 
+{% endblock %}
+
+{% block modal %}
+      <div class="modal fade" id="modal-warning">
+        <div class="modal-dialog">
+          <div class="modal-content ">
+            <div class="modal-header bg-warning">
+              <h4 class="modal-title">ATTENTION</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+              <p>Voulez-vous vraiment supprimer cette commande ?</p>
+            </div>
+            <div class="modal-footer justify-content-between bg-warning">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">Non</button>
+              <button type="button" class="btn btn-danger">Oui</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+
 {% endblock %}

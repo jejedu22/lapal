@@ -113,7 +113,7 @@
                     <div class="container-fluid">
                         <div class="row mb-2">
                             <div class="col-sm-6">
-                                <h1 class="m-0 text-dark">Bienvenu sur le site de commande de La Place Au Levain</h1>
+                                <h1 class="m-0 text-dark">Bienvenue sur le site de commande de La Place Au Levain</h1>
                             </div><!-- /.col -->
                         </div><!-- /.row -->
                     </div><!-- /.container-fluid -->
@@ -122,17 +122,23 @@
 
                 <!-- Main content -->
                 <div class="content">
+                    {% block modal %}
+                    {% endblock %}
                     <div class="container-fluid">
                         <div class="row">
-                            {% for label, messages in app.flashes %}
-                                {% for message in messages %}
-                                    <div class="alert alert-{{ label }} alert-dismissible">
-                                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                        <h4><i class="icon fa fa-warning"></i> {{ label|trans }} </h4>
-                                        {{ message }}
-                                    </div>
+                            <div class="col-md-12">
+                                {% for label, messages in app.flashes %}
+                                    {% for message in messages %}
+                                        <div class="alert alert-{{ label }} alert-dismissible">
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                            <h4><i class="icon fa fa-warning"></i> {{ label|trans }} </h4>
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
                                 {% endfor %}
-                            {% endfor %}
+                            </div>
+                        </div>
+                        <div class="row">
 
                             {% block body %}
                             {% endblock %}
