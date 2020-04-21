@@ -24,6 +24,9 @@ class JourDistribType extends AbstractType
                 'choice_value' => 'id',
                 'multiple' => true,
                 'expanded' => true,
+                'choice_attr' => function($val, $key, $index) {
+                    return array('checked' => true);
+                },
             ])
             ->add('date', DateType::class, [
                 'label' => 'Date de Disribution ',

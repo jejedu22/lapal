@@ -30,7 +30,8 @@ class LigneCommandeType extends AbstractType
             ])
             ->add('quantite', IntegerType::class,[
                 'required' => true,
-                'attr' => array('min' => 1, 'max' => 5),
+                'attr' => array('min' => 1),
+                'data' => 1,
             ])
 
 
