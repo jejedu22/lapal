@@ -14,10 +14,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/passe/commande")
- */
-
 class DefaultController extends AbstractController
 {
     /**
@@ -42,7 +38,7 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/{idJourDistrib}", name="passe_commande_new", methods={"GET","POST"})
+     * @Route("/new/{idJourDistrib}", name="passe_commande_new", methods={"GET","POST"})
      */
     public function new(Request $request, int $idJourDistrib, JourDistribRepository $jourDistribRepository): Response
     {
