@@ -31,9 +31,10 @@ class JourDistribType extends AbstractType
             ->add('date', DateType::class, [
                 'label' => 'Date de Disribution ',
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control input-inline js-datepicker'],
-                'format' => 'dd/MM/yyyy',
-                'html5' => false,
+                // 'attr' => ['class' => 'ui-datepicker'],
+                // 'format' => 'dd/MM/yyyy',
+                // 'html5' => false,
+                // 'model_timezone' => 'Europe/Paris',
             ])
             ->add('total', NumberType::class,[
                 'label' => 'Poid total de la fournée (en kg)'
