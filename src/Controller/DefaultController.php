@@ -79,7 +79,7 @@ class DefaultController extends AbstractController
             else {
                 $this->addFlash(
                     'warning',
-                    'La limte de poid disponible a été dépassée !'
+                    'La limite de poid disponible a été dépassée !'
                 );
                 return $this->redirectToRoute('passe_commande_index');
             }
