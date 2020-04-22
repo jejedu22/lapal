@@ -81,7 +81,7 @@ class DefaultController extends AbstractController
                     'warning',
                     'La limte de poid disponible a été dépassée !'
                 );
-                return $this->redirectToRoute('passe_commande');
+                return $this->redirectToRoute('passe_commande_index');
             }
             
         }
