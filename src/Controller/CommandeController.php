@@ -89,6 +89,6 @@ class CommandeController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('commande_index');
+        return $this->redirectToRoute('passe_commande_index');
     }
 }

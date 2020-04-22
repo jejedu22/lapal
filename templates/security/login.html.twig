@@ -15,7 +15,7 @@
         <div class="mb-3">
             Vous êtes connecté {{ app.user.username }}, <a href="{{ path('app_logout') }}">Déconnexion</a>
         </div>
-    {% endif %}
+    {% else %}
         <div class="input-group mb-3">
             <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" required autofocus>
             <div class="input-group-append">
@@ -40,6 +40,7 @@
           </div>
           <!-- /.col -->
         </div>
+    {% endif %}
 
     {#
         Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
