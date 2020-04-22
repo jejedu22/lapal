@@ -20,15 +20,13 @@
                     <thead>
                         <tr>
                             <th>Pain</th>
-                            <th>Poid</th>
                             <th>Quantite</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for ligne_commande in ligne_commandes %}
                         <tr onclick="document.location = '{{ path('ligne_commande_edit', {'id': ligne_commande.id}) }}';">
-                            <td>{{ ligne_commande.pain.nom }}</td>
-                            <td>{{ ligne_commande.pain.poid }}</td>
+                            <td>{{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg</td>
                             <td>{{ ligne_commande.quantite }}</td>
 
                         </tr>

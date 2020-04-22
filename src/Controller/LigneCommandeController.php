@@ -74,11 +74,21 @@ class LigneCommandeController extends AbstractController
     public function delete(Request $request, LigneCommande $ligneCommande): Response
     {
         if ($this->isCsrfTokenValid('delete'.$ligneCommande->getId(), $request->request->get('_token'))) {
+
+
+            $poidLigneCommande = 0;
+            $poidLigneCommande += $ligneCommande->getPain()->getPoid() * $ligneCommande->getQuantite();
+            
+            $poidRestant = $ligneCommande->getCommande()->getJourDistrib()->getPoidRestant();
+            $poidRestant -= $poidLigneCommande;
+
+            $poidRestant = $ligneCommande->getCommande()->getJourDistrib()->setPoidRestant($poidRestant);
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($ligneCommande);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('ligne_commande_index');
+        return $this->redirectToRoute('commande_index');
     }
 }

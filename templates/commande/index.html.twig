@@ -6,39 +6,39 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }} - {{ commande.jourDistrib.date|format_datetime('full', 'none', locale='fr') }}</h5>
+                <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }}</br>
+                {{ commande.jourDistrib.date|format_datetime('full', 'none', locale='fr') }}</h5>
                 <div class="card-tools">
                     {{ include('commande/_delete_form.html.twig') }}
                 </div>
             </div>
             <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
+                <table class="table table-sm">
 
                     <thead>
                         <tr>
-                            <th>Nom</th>
-                            <th>Poid</th>
-                            <th>Quantite</th>
+                            <th>Pain</th>
+                            <th>Nb</th>
                             <th>Prix</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                     {% set total = 0 %}
-                    {% for ligne in commande.lignecommandes %}
-                        {% set somme = ligne.quantite*ligne.pain.prix %}
+                    {% for ligne_commande in commande.lignecommandes %}
+                        {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}
                         {% set total = total+somme %}
                         <tr>
-                            <td>{{ ligne.pain.nom }}</td>
-                            <td>{{ ligne.pain.poid }}</td>
-                            <td>{{ ligne.quantite }}</td>
-                            <td>{{ somme }}</td>
+                            <td>{{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg</td>
+                            <td>{{ ligne_commande.quantite }}</td>
+                            <td>{{ somme }} €</td>
+                            <td>{{ include('ligne_commande/_delete_form.html.twig') }}</td>
                         </tr>
                     {% endfor %}
                         <tr>
-                            <td></td>
-                            <td></td>
-                            <td>Total</td>
+                            <td colspan=2 align=right>Total</td>
                             <td>{{ total }}€</td>
+                            <td></td>
                         </tr>
                     </tbody>
                 </table>

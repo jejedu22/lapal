@@ -13,15 +13,24 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class DefaultController extends AbstractController
 {
+    private $session;
+
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+    }
     /**
      * @Route("/", name="passe_commande_index", methods={"GET"})
      */
     public function index(JourDistribRepository $jourDistribRepository): Response
     {
         return $this->render('passe_commande/index.html.twig', [
+            'lastNom' => $this->session->get('commande_nom'),
+            'lastPrenom' => $this->session->get('commande_prenom'),
             'jour_distribs' => $jourDistribRepository->findAll(),
             'poid_restant' => $jourDistribRepository->findPoid(),
         ]);
@@ -46,28 +55,37 @@ class DefaultController extends AbstractController
         $jourDistrib = $jourDistribRepository->findOneById($idJourDistrib);
         $pains = $jourDistrib->getPains();
 
-        $form = $this->createForm(CommandeType::class, $commande, ['pains' => $pains, 'idJourDistrib' => $idJourDistrib, 'jourDistrib' => $jourDistrib]);
+        $form = $this->createForm(CommandeType::class, $commande, [
+            'pains' => $pains, 
+            'idJourDistrib' => $idJourDistrib, 
+            'jourDistrib' => $jourDistrib,
+            'lastNom' => $this->session->get('commande_nom'),
+            'lastPrenom' => $this->session->get('commande_prenom'),
+            ]);
         $form->handleRequest($request);
         
         if ($form->isSubmitted() && $form->isValid()) {
-
             // On récupère la somme des poids des pain de la commande
             $poidCommande = 0;
             foreach ($form->getData()->getLigneCommandes() as $ligneCommande ){
                 $poidCommande += $ligneCommande->getPain()->getPoid() * floatval($ligneCommande->getQuantite());
             }
-
+            
             // On additionne avec le poid restant du jour
             $poidRestant = $form->getData()->getJourDistrib()->getPoidRestant();
             $poidRestant += $poidCommande;
-
+            
             if ($poidRestant <= $form->getData()->getJourDistrib()->getTotal()) {
-
+                
                 $form->getData()->getJourDistrib()->setPoidRestant($poidRestant);
-                dump($form->getData()->getJourDistrib()->getPoidRestant());
+
                 $entityManager = $this->getDoctrine()->getManager();
                 $entityManager->persist($commande);
                 $entityManager->flush();
+
+                $this->session->set('commande_id', $commande->getId());
+                $this->session->set('commande_nom', $commande->getNom());
+                $this->session->set('commande_prenom', $commande->getPrenom());
                 
                 $this->addFlash(
                     'success',

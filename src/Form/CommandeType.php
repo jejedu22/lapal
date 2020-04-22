@@ -45,10 +45,13 @@ class CommandeType extends AbstractType
             ->add('nom', TextType::class, [
                 'label' => 'Nom : ',
                 'required' => true,
-            ])
+                'data' => $options['lastNom']
+                ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom : ',
-                'required' => true,            ])
+                'required' => true,            
+                'data' => $options['lastPrenom']
+            ])
             ->add('ligneCommandes', CollectionType::class, [
                 'entry_type'   => LigneCommandeType::class,
                 'entry_options' => ['label' => false, 'pains' => $options['pains']],
@@ -71,6 +74,8 @@ class CommandeType extends AbstractType
             'idJourDistrib' => 1,
             'pains' => Pain::class,
             'jourDistrib' => JourDistrib::class,
+            'lastNom' => null,
+            'lastPrenom' => null,
         ]);
         $resolver->setAllowedTypes('idJourDistrib', 'int');
     }

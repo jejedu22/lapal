@@ -9,20 +9,35 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 /**
  * @Route("/commande")
  */
 class CommandeController extends AbstractController
 {
+    private $session;
+
+    public function __construct(SessionInterface $session)
+    {
+        $this->session = $session;
+    }
+
     /**
      * @Route("/", name="commande_index", methods={"GET"})
      */
     public function index(CommandeRepository $commandeRepository): Response
     {
-        return $this->render('commande/index.html.twig', [
-            'commande' => $commandeRepository->findOneBy([], ['id' => 'desc']),
-        ]);
+        $commandeId = $this->session->get('commande_id');
+
+        if ($commandeId != null){
+            return $this->render('commande/index.html.twig', [
+                'commande' => $commandeRepository->findOneById($commandeId),
+                ]);
+        }
+        else {
+            return $this->redirectToRoute('passe_commande_index');
+        }
     }
 
     /**
@@ -30,14 +45,24 @@ class CommandeController extends AbstractController
      */
     public function new(Request $request): Response
     {
+       dump( $this->session->get('commande_nom'));
+       die;
         $commande = new Commande();
-        $form = $this->createForm(CommandeType::class, $commande);
+        $form = $this->createForm(CommandeType::class, $commande, [
+            'lastNom' => $this->session->get('commande_nom'),
+            'lastPrenom' => $this->session->get('commande_prenom'),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($commande);
             $entityManager->flush();
+            
+            $this->session->set('commande_id', $commande->getId());
+            $this->session->set('commande_nom', $commande->getNom());
+            $this->session->set('commande_prenom', $commande->getPrenom());
 
             return $this->redirectToRoute('commande_index');
         }

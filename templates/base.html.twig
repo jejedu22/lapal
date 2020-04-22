@@ -87,15 +87,15 @@
                                             <p>Synthèse par date</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('commande_index') }}" class="nav-link active">
-                                            <i class="fas fa-list-ul nav-icon"></i>
-                                            <p>La dernière Commande</p>
-                                        </a>
-                                    </li>
                                 </ul>
                             </li>
                             {% endif %}
+                            <li class="nav-item">
+                                <a href="{{ path('commande_index') }}" class="nav-link active danger">
+                                    <i class="fas fa-list-ul nav-icon"></i>
+                                    <p>Ma dernière Commande</p>
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a href="{{ path('passe_commande_index') }}" class="nav-link active danger">
                                     <i class="fas fa-shopping-bag nav-icon"></i>
