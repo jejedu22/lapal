@@ -1,15 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Sythèse des commandes par date{% endblock %}
+{% block title %}Sythèse poids{% endblock %}
 
-{% block body %}
+{% block titre_page %}
+<h3 class="s-0 text-dark">Sythèse des  poids</h3>
+{% endblock %}
+{% block body 
+%}
 <div class="col-md-12">
     <div class="card">
-        <div class="card-header border-transparent">
-            <h3 class="card-title">Sythèse des commandes par date</h3>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body">
         {% for poid in poids %}
             <div class="card">
                 <div class="card-header border-transparent">
@@ -43,8 +42,6 @@
                 </div>
             </div>
         {% endfor %}
-        </div>
-    </div>
 </div>
 {% endblock %}
 
