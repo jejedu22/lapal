@@ -112,6 +112,7 @@ class CommandeController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($commande);
             $entityManager->flush();
+            $this->session->set('commande_id', null);
         }
 
         return $this->redirectToRoute('passe_commande_index');

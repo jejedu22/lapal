@@ -39,19 +39,8 @@ class JourDistribRepository extends ServiceEntityRepository
         ;
     }
     */
-
-
     public function findPoid()
     {
-        // return $this->createQueryBuilder('j')
-        //     ->select('SUM(p.poid) as total_commande', 'c.id')
-        //     ->innerJoin(Commande::class ,'c', 'WITH', 'j.id = c.jour_distrib_id')
-        //     ->innerJoin(LigneCommande::class ,'lc', 'WITH', 'c.id = lc.commande_id')
-        //     ->innerJoin(Pain::class ,'p', 'WITH', 'lc.pain_id = p.id')
-        //     ->groupBy('c.id')
-        //     ->getQuery()
-        //     ->getScalarResult();
-        
         $entityManager = $this->getEntityManager();
 
         $query = $entityManager->createQuery(
@@ -62,6 +51,24 @@ class JourDistribRepository extends ServiceEntityRepository
             INNER JOIN lc.pain p
             GROUP BY c.id, j.total'
         );
+
+        return $query->getResult();
+        ;
+    }
+
+    public function findPoids($jourDistribId)
+    {
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            'SELECT p.nom, p.poid, SUM(p.poid) as poid_pain
+            FROM App\Entity\JourDistrib j
+            INNER JOIN j.commandes c
+            INNER JOIN c.ligneCommandes lc
+            INNER JOIN lc.pain p
+            WHERE j.id = :jourDistribId
+            GROUP BY p.id'
+            )->setParameter('jourDistribId', $jourDistribId);
 
         return $query->getResult();
         ;

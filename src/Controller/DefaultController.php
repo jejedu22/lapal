@@ -8,6 +8,7 @@ use App\Entity\JourDistrib;
 
 use App\Repository\CommandeRepository;
 use App\Repository\JourDistribRepository;
+use App\Repository\PainRepository;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,6 +44,26 @@ class DefaultController extends AbstractController
     {
         return $this->render('passe_commande/synthese.html.twig', [
             'jour_distribs' => $jourDistribRepository->findAll(),
+        ]);
+    }
+
+    /**
+     * @Route("/synthese/poids", name="synthese_poids", methods={"GET"})
+     */
+    public function synthesePoids(JourDistribRepository $jourDistribRepository, PainRepository $painRepository): Response
+    {
+        $poids = [];
+        $jourDistribs = $jourDistribRepository->findAll();
+        foreach ($jourDistribs as $jourDistrib ) {
+            if (is_array($jourDistribRepository->findPoids($jourDistrib->getId()))){
+                $poidsDate = [ "date" => $jourDistrib->getDate() ];
+                $poidsDate += [ "pains" => $jourDistribRepository->findPoids($jourDistrib->getId()) ];
+                array_push($poids, $poidsDate);
+            }
+        }
+
+        return $this->render('passe_commande/synthese_poids.html.twig', [
+            'poids' => $poids,
         ]);
     }
 
