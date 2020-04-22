@@ -41,4 +41,4 @@ security:
         - { path: ^/pain, roles: ROLE_USER }
         - { path: ^/jour, roles: ROLE_USER }
         - { path: ^/synthese, roles: ROLE_USER }
-        # - { path: ^/register, roles: ROLE_USER }
+        - { path: ^/register, roles: ROLE_USER }
