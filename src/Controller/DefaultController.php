@@ -110,12 +110,22 @@ class DefaultController extends AbstractController
         $jourDistrib = $jourDistribRepository->findOneById($idJourDistrib);
         $pains = $jourDistrib->getPains();
 
+        $request = Request::createFromGlobals();
+        $cookie = $request->cookies->get('commande');
+        $nom = "";
+        $prenom = "";
+        if (isset($cookie)) {
+            $contentCookie = json_decode($cookie);
+            $nom = $contentCookie->nom;
+            $prenom = $contentCookie->prenom;
+        }
+
         $form = $this->createForm(CommandeType::class, $commande, [
             'pains' => $pains, 
             'idJourDistrib' => $idJourDistrib, 
             'jourDistrib' => $jourDistrib,
-            'lastNom' => $this->session->get('commande_nom'),
-            'lastPrenom' => $this->session->get('commande_prenom'),
+            'lastNom' => $nom,
+            'lastPrenom' => $prenom,
             ]);
         $form->handleRequest($request);
         
