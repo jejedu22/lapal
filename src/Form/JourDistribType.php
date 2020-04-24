@@ -13,21 +13,37 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class JourDistribType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if ($options['edit']){
+            $builder
+                ->add('pains', EntityType::class, [
+                    'class' => Pain::class,
+                    'choice_label' => function (Pain $pain = null) {
+                        return $pain->getNom() . " - " . $pain->getPoid() . "kg";
+                    },
+                    'choice_value' => 'id',
+                    'multiple' => true,
+                    'expanded' => true,
+                ]);
+        }
+        else {
+            $builder
+                ->add('pains', EntityType::class, [
+                    'class' => Pain::class,
+                    'choice_label' => function (Pain $pain = null) {
+                        return $pain->getNom() . " - " . $pain->getPoid() . "kg";
+                    },
+                    'choice_value' => 'id',
+                    'multiple' => true,
+                    'expanded' => true,
+                    'choice_attr' => function($val, $key, $index) {
+                        return array('checked' => true);
+                    },
+                ]);
+        }
         $builder
-            ->add('pains', EntityType::class, [
-                'class' => Pain::class,
-                'choice_label' => function (Pain $pain = null) {
-                    return $pain->getNom() . " - " . $pain->getPoid() . "kg";
-                },
-                'choice_value' => 'id',
-                'multiple' => true,
-                'expanded' => true,
-                'choice_attr' => function($val, $key, $index) {
-                    return array('checked' => true);
-                },
-            ])
             ->add('date', DateType::class, [
                 'label' => 'Date de Disribution ',
                 'widget' => 'single_text',
@@ -46,6 +62,7 @@ class JourDistribType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => JourDistrib::class,
+            'edit' => false,
         ]);
     }
 }

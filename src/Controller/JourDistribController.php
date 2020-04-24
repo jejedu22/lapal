@@ -53,7 +53,9 @@ class JourDistribController extends AbstractController
      */
     public function edit(Request $request, JourDistrib $jourDistrib): Response
     {
-        $form = $this->createForm(JourDistribType::class, $jourDistrib);
+        $form = $this->createForm(JourDistribType::class, $jourDistrib, [
+            'edit' => true, 
+            ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

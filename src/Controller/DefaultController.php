@@ -76,7 +76,7 @@ class DefaultController extends AbstractController
             
             $painsJour = [];
             
-            $pains = $jourDistrib->getPains();
+            $pains = $painRepository->findAll();
             foreach ($pains as $pain) {
                 $poid = $jourDistribRepository->findPoidPains($jourDistrib->getId(), $pain->getId() );
                 if (is_array( $poid )){
