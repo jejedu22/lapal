@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+use Symfony\Component\HttpFoundation\Cookie;
+
 class DefaultController extends AbstractController
 {
     private $session;
@@ -38,32 +40,64 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/synthese", name="synthese_index", methods={"GET"})
+     * @Route("/synthese/{suivi}", name="synthese_index", methods={"GET"})
      */
-    public function synthese(JourDistribRepository $jourDistribRepository): Response
+    public function synthese(JourDistribRepository $jourDistribRepository, int $suivi ): Response
     {
         return $this->render('passe_commande/synthese.html.twig', [
             'jour_distribs' => $jourDistribRepository->findAll(),
+            'suivi' => $suivi
         ]);
     }
 
     /**
-     * @Route("/synthese/poids", name="synthese_poids", methods={"GET"})
+     * @Route("/livree/{commandeId}", name="livree_commande", methods={"GET"})
+     */
+    public function livreeCommande(CommandeRepository $commandeRepository, int $commandeId ): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $commande = $entityManager->getRepository(Commande::class)->find($commandeId);
+        $commande->setLivree(true);
+        
+        $entityManager->persist($commande);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('synthese_index',['suivi' => 1]);
+    }
+
+    /**
+     * @Route("/synthesepoids", name="synthese_poids", methods={"GET"})
      */
     public function synthesePoids(JourDistribRepository $jourDistribRepository, PainRepository $painRepository): Response
     {
-        $poids = [];
         $jourDistribs = $jourDistribRepository->findAll();
+        $dates = [];
         foreach ($jourDistribs as $jourDistrib ) {
-            if (is_array($jourDistribRepository->findPoids($jourDistrib->getId()))){
-                $poidsDate = [ "date" => $jourDistrib->getDate() ];
-                $poidsDate += [ "pains" => $jourDistribRepository->findPoids($jourDistrib->getId()) ];
-                array_push($poids, $poidsDate);
+            
+            $painsJour = [];
+            
+            $pains = $jourDistrib->getPains();
+            foreach ($pains as $pain) {
+                $poid = $jourDistribRepository->findPoidPains($jourDistrib->getId(), $pain->getId() );
+                if (is_array( $poid )){
+                    
+                    $poidPain = [ "nom" => $pain->getNom() . " - " . $pain->getPoid() . " kg" ];
+                    $poidPain += [ "id" => $pain->getId() ];
+                    $poidPain += [ "poid" => $jourDistribRepository->findPoidPains($jourDistrib->getId(), $pain->getId() ) ];
+                    
+                }
+                array_push($painsJour, $poidPain);
             }
+            $date = [ 
+                "date" => $jourDistrib->getDate(),
+                "pains" => $painsJour,
+            ];
+            array_push($dates, $date);
         }
-
+        // dump ($dates);
+        // die;
         return $this->render('passe_commande/synthese_poids.html.twig', [
-            'poids' => $poids,
+            'poidsDates' => $dates,
         ]);
     }
 
@@ -104,16 +138,22 @@ class DefaultController extends AbstractController
                 $entityManager->persist($commande);
                 $entityManager->flush();
 
-                $this->session->set('commande_id', $commande->getId());
-                $this->session->set('commande_nom', $commande->getNom());
-                $this->session->set('commande_prenom', $commande->getPrenom());
-                
+                $cookieValue = [
+                    'command_id' => $commande->getId(),
+                    'nom' => $commande->getNom(),
+                    'prenom' => $commande->getPrenom(),
+                ];
+
+                $coockie = new Cookie('commande', json_encode($cookieValue), time() + ( 2 * 365 * 24 * 60 * 60));
+                $response = $this->redirectToRoute('commande_index');
+                $response->headers->setCookie($coockie);
+
                 $this->addFlash(
                     'success',
                     'La commande a été enregistrée'
-                    
                 );            
-                return $this->redirectToRoute('commande_index');
+                    
+                return $response;
             }
             else {
                 $this->addFlash(

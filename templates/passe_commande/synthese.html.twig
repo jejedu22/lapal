@@ -33,20 +33,28 @@
                     </thead>
                     <tbody>
                         {% for commande in jour_distrib.commandes %}
-                        {% set total = 0 %}
-                        {% set somme = 0 %}
-                        <tr>
-                            <td>{{ commande.prenom }} {{ commande.nom }}</td>
-                            <td>
-                            {% for ligne_commande in commande.ligneCommandes %}
-                                {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}
-                                {% set total = total+somme %}
-                                <p>{{ ligne_commande.quantite}} {{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg </p>
-                            {% endfor %}
-                            </td>
-                            <td>{{ total }} €</td>
-                            <td>{{ include('commande/_delete_form.html.twig') }}</td>
-                        </tr>
+                            {% if commande.livree == null or suivi == 0 %}
+                                {% set total = 0 %}
+                                {% set somme = 0 %}
+                                <tr>
+                                    <td>{{ commande.prenom }} {{ commande.nom }}</td>
+                                    <td>
+                                    {% for ligne_commande in commande.ligneCommandes %}
+                                        {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}
+                                        {% set total = total+somme %}
+                                        <p>{{ ligne_commande.quantite}} {{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg </p>
+                                    {% endfor %}
+                                    </td>
+                                    <td>{{ total }} €</td>
+                                    <td>
+                                        {% if suivi == 1 %}
+                                            <a href="{{ path('livree_commande', { commandeId: commande.id }) }}" onclick="return confirm('Tu lui as vraiment donné son pain ?')"><i class="fas fa-check"></i></a>
+                                        {% else %}
+                                            <td>{{ include('commande/_delete_form.html.twig') }}</td>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>

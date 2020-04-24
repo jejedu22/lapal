@@ -63,6 +63,9 @@ class CommandeType extends AbstractType
                 'by_reference' => false,
                 'delete_empty' => true,
             ])
+            ->add('livree', HiddenType::class, [
+                'data' => 0,
+            ])
             // ->addEventListener(FormEvents::PRE_SUBMIT, $listener);
         ;
     }

@@ -21,6 +21,7 @@
                 <table class="table table-hover text-nowrap">
                     <thead>
                         <tr>
+                            <th>Id</th>
                             <th>Nom</th>
                             <th>Poid</th>
                             <th>Prix</th>
@@ -30,6 +31,7 @@
                     {% for pain in pains %}
                         
                         <tr onclick="document.location = '{{ path('pain_edit', {'id': pain.id}) }}';">
+                            <td>{{ pain.id }}</td>
                             <td>{{ pain.nom }}</td>
                             <td>{{ pain.poid |number_format(2, ',', '.')}} kg</td>
                             <td>{{ pain.prix |number_format(2, ',', '.')}} €</td>

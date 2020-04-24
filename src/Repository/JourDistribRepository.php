@@ -44,31 +44,34 @@ class JourDistribRepository extends ServiceEntityRepository
         $entityManager = $this->getEntityManager();
 
         $query = $entityManager->createQuery(
-            'SELECT c.id, j.total, SUM(p.poid) as total_commande
+            'SELECT c.id, p.id, j.total, SUM(p.poid) as total_commande
             FROM App\Entity\JourDistrib j
             INNER JOIN j.commandes c
             INNER JOIN c.ligneCommandes lc
             INNER JOIN lc.pain p
-            GROUP BY c.id, j.total'
+            GROUP BY c.id, j.total, p.id'
         );
 
         return $query->getResult();
         ;
     }
 
-    public function findPoids($jourDistribId)
+    public function findPoidPains( $jourDistribId, $painId )
     {
         $entityManager = $this->getEntityManager();
 
         $query = $entityManager->createQuery(
-            'SELECT p.nom, p.poid, SUM(p.poid) as poid_pain
+            'SELECT SUM(p.poid) as poid
             FROM App\Entity\JourDistrib j
             INNER JOIN j.commandes c
             INNER JOIN c.ligneCommandes lc
             INNER JOIN lc.pain p
             WHERE j.id = :jourDistribId
+            AND p.id = :painId
             GROUP BY p.id'
-            )->setParameter('jourDistribId', $jourDistribId);
+            )
+            ->setParameter('jourDistribId', $jourDistribId)
+            ->setParameter('painId', $painId);
 
         return $query->getResult();
         ;

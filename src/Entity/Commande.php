@@ -38,6 +38,11 @@ class Commande
      */
     private $jourDistrib;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $livree;
+
     public function __construct()
     {
         $this->ligneCommandes = new ArrayCollection();
@@ -111,6 +116,18 @@ class Commande
     public function setJourDistrib(?JourDistrib $jourDistrib): self
     {
         $this->jourDistrib = $jourDistrib;
+
+        return $this;
+    }
+
+    public function getLivree(): ?bool
+    {
+        return $this->livree;
+    }
+
+    public function setLivree(bool $livree): self
+    {
+        $this->livree = $livree;
 
         return $this;
     }
