@@ -39,6 +39,11 @@ class JourDistribRepository extends ServiceEntityRepository
         ;
     }
     */
+    public function findAll()
+    {
+        return $this->findBy(array(), array('date' => 'DESC'));
+    }
+
     public function findPoid()
     {
         $entityManager = $this->getEntityManager();
