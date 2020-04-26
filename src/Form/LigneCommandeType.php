@@ -21,7 +21,7 @@ class LigneCommandeType extends AbstractType
             ->add('pain', EntityType::class, [
                 'class' => Pain::class,
                 'choice_label' => function (Pain $pain = null) {
-                    return $pain->getNom() . " - " . $pain->getPoid() . " kg";
+                    return $pain->getNom() . " - " . $pain->getPoid() . " kg" . " - " . $pain->getPrix() . " €";
                 },
                 'choice_value' => 'id',
                 'choices' => $options['pains'],
