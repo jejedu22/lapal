@@ -4,7 +4,7 @@
     "sLengthMenu": "Afficher _MENU_ commandes",
     "sInfo": "Commandes _START_ &agrave; _END_ sur _TOTAL_",
     "sInfoEmpty": "C'est vide",
-    "sInfoFiltered": "(filtr&eacute; de _MAX_ commande au total)",
+    "sInfoFiltered": "(_MAX_ au total)",
     "sInfoPostFix": "",
     "sLoadingRecords": "Chargement en cours...",
     "sZeroRecords": "Ya pas pain !",
