@@ -43,6 +43,7 @@ jQuery(document).ready(function() {
     });
 });
 
+
 function addLigneCommandeForm($collectionHolder, $newLinkLi) {
     // Get the data-prototype explained earlier
     var prototype = $collectionHolder.data('prototype');
@@ -66,6 +67,20 @@ function addLigneCommandeForm($collectionHolder, $newLinkLi) {
     // Display the form in the page in an li, before the "Add a ligne" link li
     var $newFormLi = $('<li class="list-group-item"></li>').append(newForm);
     $newLinkLi.before($newFormLi);
+    
+    $newFormLi.append('<a href="#" class="remove-tag"><button class="btn"><i class="fas fa-trash-alt"></i></button></a>');
+    
+    $newLinkLi.before($newFormLi);
+    
+    // handle the removal, just for this example
+    $('.remove-tag').click(function(e) {
+        e.preventDefault();
+        
+        $(this).parent().remove();
+        
+        return false;
+    });
+    
 }
 </script>
 
