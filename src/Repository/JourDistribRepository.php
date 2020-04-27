@@ -66,7 +66,7 @@ class JourDistribRepository extends ServiceEntityRepository
         $entityManager = $this->getEntityManager();
 
         $query = $entityManager->createQuery(
-            'SELECT SUM(p.poid) as poid
+            'SELECT SUM(p.poid*lc.quantite) as poid
             FROM App\Entity\JourDistrib j
             INNER JOIN j.commandes c
             INNER JOIN c.ligneCommandes lc
