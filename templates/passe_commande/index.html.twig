@@ -23,7 +23,7 @@
                     {% if jour_distrib.poidRestant < jour_distrib.total and jour_distrib.date|date('Y-m-d') > "now"|date('Y-m-d') %}
                         <tr onclick="document.location = '{{ path('passe_commande_new', {'idJourDistrib': jour_distrib.id}) }}';">
                             <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
-                            <td>{{ jour_distrib.total - jour_distrib.poidRestant|default(0)}} kg</td>
+                            <td>{{ (jour_distrib.total - jour_distrib.poidRestant)|round(1, 'ceil')|default(0)}} kg</td>
                         </tr>
                     {% else %}
                         <tr class="table-warning">
