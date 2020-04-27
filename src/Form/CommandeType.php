@@ -12,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -63,6 +64,7 @@ class CommandeType extends AbstractType
                 'by_reference' => false,
                 'delete_empty' => true,
             ])
+            ->add('commentaire', TextareaType::class)
             ->add('livree', HiddenType::class, [
                 'data' => 0,
             ])

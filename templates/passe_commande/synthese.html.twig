@@ -43,7 +43,7 @@
                                 {% set total = 0 %}
                                 {% set somme = 0 %}
                                 <tr>
-                                    <td>{{ commande.prenom }} {{ commande.nom }}</td>
+                                    <td>{{ commande.prenom }} {{ commande.nom }}</br><i><small>{{ commande.commentaire }}</small></small></td>
                                     <td>
                                     {% for ligne_commande in commande.ligneCommandes %}
                                         {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}

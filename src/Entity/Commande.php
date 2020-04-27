@@ -43,6 +43,11 @@ class Commande
      */
     private $livree;
 
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $commentaire;
+
     public function __construct()
     {
         $this->ligneCommandes = new ArrayCollection();
@@ -128,6 +133,18 @@ class Commande
     public function setLivree(bool $livree): self
     {
         $this->livree = $livree;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): self
+    {
+        $this->commentaire = $commentaire;
 
         return $this;
     }
