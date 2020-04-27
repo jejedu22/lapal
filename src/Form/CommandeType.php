@@ -64,7 +64,9 @@ class CommandeType extends AbstractType
                 'by_reference' => false,
                 'delete_empty' => true,
             ])
-            ->add('commentaire', TextareaType::class)
+            ->add('commentaire', TextareaType::class, [
+                'required' => false,   
+            ])
             ->add('livree', HiddenType::class, [
                 'data' => 0,
             ])
