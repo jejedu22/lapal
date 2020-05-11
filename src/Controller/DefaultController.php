@@ -44,8 +44,22 @@ class DefaultController extends AbstractController
      */
     public function synthese(JourDistribRepository $jourDistribRepository, int $suivi ): Response
     {
+        switch ($suivi) {
+            case 0:
+                $order = 'ASC';
+                break;
+            case 1:
+                $order = 'DESC';
+                break;
+            case 2:
+                $order = 'DESC';
+                break;
+            default:
+                $order = 'ASC';
+                break;
+        }
         return $this->render('passe_commande/synthese.html.twig', [
-            'jour_distribs' => $jourDistribRepository->findAll(),
+            'jour_distribs' => $jourDistribRepository->findAllOrder($order),
             'suivi' => $suivi
         ]);
     }
@@ -70,7 +84,7 @@ class DefaultController extends AbstractController
      */
     public function synthesePoids(JourDistribRepository $jourDistribRepository, PainRepository $painRepository): Response
     {
-        $jourDistribs = $jourDistribRepository->findAll();
+        $jourDistribs = $jourDistribRepository->findAllOrder('DESC');
         $dates = [];
         foreach ($jourDistribs as $jourDistrib ) {
             

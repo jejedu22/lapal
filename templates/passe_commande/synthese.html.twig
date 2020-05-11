@@ -1,10 +1,23 @@
 {% extends 'base.html.twig' %}
+    {% block title %}
+        {% if suivi == 1 %}
+            Suivi de livrason
+        {% elseif suivi == 0 %}
+            Sythèse des commandes
+        {% else %}
+            Sythèse des commandes par date
+        {% endif %}
+    {% endblock %}
 
-{% block title %}Sythèse des commandes par date{% endblock %}
-
-{% block titre_page %}
-<h3 class="s-0 text-dark">Sythèse des commandes par date</h3>
-{% endblock %}
+    {% block titre_page %}
+        {% if suivi == 1 %}
+            <h3 class="s-0 text-dark">Suivi de livrason</h3>
+        {% elseif suivi == 0 %}
+            <h3 class="s-0 text-dark">Sythèse des commandes</h3>
+        {% else %}
+            <h3 class="s-0 text-dark">Toutes les commandes par date</h3>
+        {% endif %}
+    {% endblock %}
 
 {% block stylesheets %}
   <link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
@@ -15,8 +28,14 @@
 {% block body %}
 <div class="col-md-12">
 {% for jour_distrib in jour_distribs %}
-
-    <div class="card">
+    {% if jour_distrib.date|date('Y-m-d') >= "now"|date('Y-m-d') or suivi == 1 or suivi == 2 %}
+        {% if suivi == 2 %}
+            <div class="card collapsed-card">
+        {% elseif suivi == 1 and jour_distrib.date|date('Y-m-d') != "now"|date('Y-m-d') %}
+            <div class="card collapsed-card">
+        {% else %}
+            <div class="card">
+        {% endif %}
         <div class="card-header border-transparent">
             <h3 class="card-title">{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</h3>
             <div class="card-tools">
@@ -39,6 +58,7 @@
                     </thead>
                     <tbody>
                         {% for commande in jour_distrib.commandes %}
+
                             {% if commande.livree == null or suivi == 0 %}
                                 {% set total = 0 %}
                                 {% set somme = 0 %}
@@ -67,6 +87,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 {% endfor %}
 
 </div>

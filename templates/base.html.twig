@@ -88,6 +88,12 @@
                                         </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="{{ path('synthese_index', {'suivi': 2 }) }}" class="nav-link active">
+                                            <i class="fas fa-list-ul nav-icon"></i>
+                                            <p>Toutes les commandes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="{{ path('synthese_poids') }}" class="nav-link active">
                                             <i class="fas fa-balance-scale-right nav-icon"></i>
                                             <p>Synthèse des poids</p>
@@ -98,7 +104,7 @@
                             {% endif %}
                             <li class="nav-item">
                                 <a href="{{ path('commande_index') }}" class="nav-link active danger">
-                                    <i class="fas fa-list-ul nav-icon"></i>
+                                    <i class="fas fa-bookmark nav-icon"></i>
                                     <p>Ma dernière Commande</p>
                                 </a>
                             </li>

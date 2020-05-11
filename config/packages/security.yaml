@@ -41,5 +41,6 @@ security:
         - { path: ^/pain, roles: ROLE_USER }
         - { path: ^/jour, roles: ROLE_USER }
         - { path: ^/synthese/1, roles: ROLE_USER }
+        - { path: ^/synthese/2, roles: ROLE_USER }
         - { path: ^/synthesepoids, roles: ROLE_USER }
         - { path: ^/register, roles: ROLE_USER }
