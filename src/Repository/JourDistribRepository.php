@@ -44,6 +44,24 @@ class JourDistribRepository extends ServiceEntityRepository
         return $this->findBy(array(), array('date' => $order));
     }
 
+    public function findAllActive()
+    {
+        $entityManager = $this->getEntityManager();
+        
+        $now = date('Y-m-d');
+
+        $query = $entityManager->createQuery(
+            'SELECT j
+            FROM App\Entity\JourDistrib j
+            WHERE j.date >= :dateNow
+            ORDER BY j.date ASC'
+        )
+        ->setParameter('dateNow', $now);
+
+
+        return $query->getResult();
+    }
+
     public function findPoid()
     {
         $entityManager = $this->getEntityManager();
@@ -58,7 +76,6 @@ class JourDistribRepository extends ServiceEntityRepository
         );
 
         return $query->getResult();
-        ;
     }
 
     public function findPoidPains( $jourDistribId, $painId )
@@ -79,7 +96,6 @@ class JourDistribRepository extends ServiceEntityRepository
             ->setParameter('painId', $painId);
 
         return $query->getResult();
-        ;
     }
     /*
     public function findOneBySomeField($value): ?JourDistrib

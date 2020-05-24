@@ -3,6 +3,9 @@
 {% block title %}Commandes{% endblock %}
 
 {% block body %}
+{% if commande is null %}
+    <meta http-equiv="refresh" content="0;URL=/"> 
+{% else %}
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
@@ -48,6 +51,7 @@
             </div>
         </div>
     </div>
+{% endif %}
 {% endblock %}
 
 {% block navbar %}

@@ -31,10 +31,12 @@ class DefaultController extends AbstractController
      */
     public function index(JourDistribRepository $jourDistribRepository): Response
     {
+        $jourDistribs = $jourDistribRepository->findAllActive();
+
         return $this->render('passe_commande/index.html.twig', [
             'lastNom' => $this->session->get('commande_nom'),
             'lastPrenom' => $this->session->get('commande_prenom'),
-            'jour_distribs' => $jourDistribRepository->findAll(),
+            'jour_distribs' => $jourDistribs,
             'poid_restant' => $jourDistribRepository->findPoid(),
         ]);
     }
@@ -46,20 +48,23 @@ class DefaultController extends AbstractController
     {
         switch ($suivi) {
             case 0:
-                $order = 'ASC';
+                $jourDistribs = $jourDistribRepository->findAllActive();
                 break;
             case 1:
                 $order = 'DESC';
+                $jourDistribs = $jourDistribRepository->findAllOrder($order);
                 break;
             case 2:
                 $order = 'DESC';
+                $jourDistribs = $jourDistribRepository->findAllOrder($order);
                 break;
             default:
                 $order = 'ASC';
+                $jourDistribs = null;
                 break;
         }
         return $this->render('passe_commande/synthese.html.twig', [
-            'jour_distribs' => $jourDistribRepository->findAllOrder($order),
+            'jour_distribs' => $jourDistribs,
             'suivi' => $suivi
         ]);
     }

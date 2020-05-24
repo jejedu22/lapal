@@ -7,8 +7,8 @@
     "sInfoFiltered": "(_MAX_ au total)",
     "sInfoPostFix": "",
     "sLoadingRecords": "Chargement en cours...",
-    "sZeroRecords": "Ya pas pain !",
-    "sEmptyTable": "Ya pas pain !",
+    "sZeroRecords": "C'est vide !",
+    "sEmptyTable": "C'est vide !",
     "oPaginate": {
         "sFirst": "Premier",
         "sPrevious": "Pr&eacute;c&eacute;dent",
