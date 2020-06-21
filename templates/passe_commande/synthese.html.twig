@@ -60,7 +60,7 @@
                     {% if jour_distrib.commandes is defined %}
                         {% for commande in jour_distrib.commandes %}
 
-                            {% if commande.livree == null or suivi == 0 %}
+                            {% if commande.livree == null or suivi == 0 or suivi == 2 %}
                                 {% set total = 0 %}
                                 {% set somme = 0 %}
                                 <tr>
