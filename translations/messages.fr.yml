@@ -23,3 +23,10 @@ delete_message: Es-tu sur de vouloir le supprimer ?
 
 warning: Attention !!!
 success: C'est enregistré !
+
+color: Couleur
+logo: "Logo de l’application"
+welcome_text: "Message d'accueil"
+name: "Nom de l’application"
+contact_email: "Email de contact"
+favicon: "Favicon du site"

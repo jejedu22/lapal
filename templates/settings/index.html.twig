@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres{% endblock %}
+
+{% block body %}
+    <h1>Paramètres</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Valeur</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for setting in settings %}
+            <tr>
+                <td>{{ setting.name |trans}}</td>
+                <td>{{ setting.value }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" onclick="location.href='{{ path('settings_edit', {'id': setting.id}) }}'">Modifier</button>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

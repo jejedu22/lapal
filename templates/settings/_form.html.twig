@@ -1,0 +1,41 @@
+{{ form_start(form) }}
+    {% if form.vars.data.id == 1 %}
+    <table class=" colors-table">
+        <tr>
+            <td class="option-color color-blue">{{ form_row(form.value[0])}}</td>
+            <td class="option-color color-indigo">{{ form_row(form.value[4])}}</td>
+            <td class="option-color color-purple">{{ form_row(form.value[11])}}</td>
+            <td class="option-color color-pink">{{ form_row(form.value[7])}}</td>
+            <td class="option-color color-red">{{ form_row(form.value[8])}}</td>
+            <td class="option-color color-orange">{{ form_row(form.value[6])}}</td>
+            <td class="option-color color-yellow">{{ form_row(form.value[5])}}</td>
+            <td class="option-color color-green">{{ form_row(form.value[10])}}</td>
+            <td class="option-color color-teal">{{ form_row(form.value[9])}}</td>
+            <td class="option-color color-cyan">{{ form_row(form.value[1])}}</td>
+            <td class="option-color color-gray">{{ form_row(form.value[2])}}</td>
+            <td class="option-color color-gray-dark">{{ form_row(form.value[3])}}</td>
+        </tr>
+    </table>
+    {% else %}
+    {{ form_widget(form.value) }}
+    {% endif %}
+    <button class="btn btn-success">{{ button_label|default('Save') }}</button>
+    
+{{ form_end(form) }}
+
+{% block javascripts %}
+    <script>
+    $(function () {
+        $('.option-color').click(
+            function () {
+                $(this).addClass('active').siblings().removeClass('active');
+                var $radioBtn = $('.option-color.active input[type="radio"]');
+
+                if ($radioBtn.is(':checked') === true) {
+                    $radioBtn.filter('input[type="radio"]').prop('checked', true);
+                }
+            }
+        );
+    });
+    </script>
+{% endblock %}

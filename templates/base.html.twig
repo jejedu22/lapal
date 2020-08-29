@@ -13,6 +13,8 @@
         <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="{{asset('/plugins/jquery-ui/jquery-ui.min.css')}}">
+        <link rel="stylesheet" href="{{asset('/dist/css/style.css')}}">
+        <link rel="shortcut icon" type="image/svg+xml" href="/favicons/favicon.svg">
         {% block stylesheets %}
         {% endblock %}
         <!-- DatePicker -->
@@ -22,7 +24,7 @@
         <div class="wrapper">
 
             <!-- Navbar -->
-            <nav class="main-header navbar navbar-expand navbar-dark navbar-teal">
+            <nav class="main-header navbar navbar-expand navbar-dark navbar-{{ options_settings.get('color') }}">
                 <!-- Left navbar links -->
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -44,11 +46,11 @@
             <!-- /.navbar -->
 
             <!-- Main Sidebar Container -->
-            <aside class="main-sidebar elevation-4 sidebar-dark-teal">
+            <aside class="main-sidebar elevation-4 sidebar-dark-{{ options_settings.get('color') }}">
                 <!-- Brand Logo -->
-                <a href="/" class="brand-link navbar-teal">
+                <a href="/" class="brand-link navbar-{{ options_settings.get('color') }}">
                     <img src="{{asset('/dist/img/lapallogo.png')}}" alt="lapal Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                    <span class="brand-text font-weight-light">LAPAL</span>
+                    <span class="brand-text font-weight-light">{{ options_settings.get('name') }}</span>
                 </a>
 
                 <!-- Sidebar -->
@@ -99,6 +101,12 @@
                                             <p>Synthèse des poids</p>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('settings_index') }}" class="nav-link active">
+                                            <i class="fas fa-cogs nav-icon"></i>
+                                            <p>Paramètrages</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             {% endif %}
@@ -140,7 +148,7 @@
                         <div class="row mb-2">
                             <div class="col-md-12">
                             {% block titre_page %}
-                                <h1 class="s-0 text-dark"><center>Commande de pain </br> La Place Au Levain</center></h1>
+                                <h1 class="s-0 text-dark"><center> 	{{ options_settings.get('welcome_text') |raw}}</center></h1>
                             {% endblock %}
                             </div><!-- /.col -->
                         </div><!-- /.row -->
