@@ -7,11 +7,11 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\ColorType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
 
@@ -51,26 +51,28 @@ class SettingsType extends AbstractType
                         return ['class' => 'color-'.strtolower($value)];
                     },
                     'placeholder' => false
-                    //    return ['style' => "background-color: ".strtolower($value)];
                 ]);
-                // dump ($form);
-                // die;
             }
-            elseif (!$settings || 2 === $settings->getId() || 6 === $settings->getId()){
+            elseif (!$settings || 2 === $settings->getId()){
                 $form->add('value', FileType::class, [
-
-                // unmapped means that this field is not associated to any entity property
-                'mapped' => false,
-                'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '100k',
-                        'mimeTypes' => [
-                            'image/png',
-                        ],
-                        'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
-                    ])
-                ],
+                    'mapped' => false,
+                    'required' => false,
+                    'constraints' => [
+                        new File([
+                            'maxSize' => '100k',
+                            'mimeTypes' => [
+                                'image/png',
+                            ],
+                            'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
+                        ])
+                    ],
+                ]);
+            }
+            elseif (!$settings || 5 === $settings->getId()){
+                $form->add('value', EmailType::class, [
+                    'help' => 'Entrez une adresse Email',
+                    'mapped' => false,
+                    'required' => false,
             ]);
             }
             else {

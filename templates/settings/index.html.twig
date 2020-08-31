@@ -12,6 +12,9 @@
                 <td>{{ setting.name |trans}}</td>
                     {% if setting.name == 'color'%}
                     <td><div class="option-index-color color-{{setting.value}}"></div></td>
+                    {% elseif setting.name == 'logo'%}
+                    <td><img src='{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}' alt="logo" class="brand-image img-circle elevation-3 navbar-{{ options_settings.get('color') }}" style="opacity: .8; max-height: 50px;"></td>
+
                     {% else %}
                     <td>{{ setting.value }}</td>
                     {% endif %}
