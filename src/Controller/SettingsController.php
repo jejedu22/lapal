@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 /**
  * @Route("/settings")
@@ -34,7 +35,29 @@ class SettingsController extends AbstractController
         $form = $this->createForm(SettingsType::class, $setting);
         $form->handleRequest($request);
 
+        
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->get('name')->getData() == 'logo') {
+                $logo = $form->get('value')->getData();
+                if ($logo) {
+                    $originalFilename = pathinfo($logo->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
+                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $logo->guessExtension();
+
+                    try {
+                        $logo->move(
+                            $this->getParameter('logo_directory'),
+                            $newFilename
+                        );
+                    } catch (FileException $e) {
+                        // ... handle exception if something happens during file upload
+                    }
+                    $setting->setValue($newFilename);
+
+                }
+
+            }
+
             $this->getDoctrine()->getManager()->flush();
 
             return $this->redirectToRoute('settings_index');

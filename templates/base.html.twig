@@ -14,7 +14,7 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="{{asset('/plugins/jquery-ui/jquery-ui.min.css')}}">
         <link rel="stylesheet" href="{{asset('/dist/css/style.css')}}">
-        <link rel="shortcut icon" type="image/svg+xml" href="/favicons/favicon.svg">
+        <link rel="shortcut icon" type="image/svg+xml" href="{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}">
         {% block stylesheets %}
         {% endblock %}
         <!-- DatePicker -->
@@ -49,7 +49,7 @@
             <aside class="main-sidebar elevation-4 sidebar-dark-{{ options_settings.get('color') }}">
                 <!-- Brand Logo -->
                 <a href="/" class="brand-link navbar-{{ options_settings.get('color') }}">
-                    <img src="{{asset('/dist/img/lapallogo.png')}}" alt="lapal Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                    <img src="{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}" alt="lapal Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
                     <span class="brand-text font-weight-light">{{ options_settings.get('name') }}</span>
                 </a>
 
@@ -104,7 +104,7 @@
                                     <li class="nav-item">
                                         <a href="{{ path('settings_index') }}" class="nav-link active">
                                             <i class="fas fa-cogs nav-icon"></i>
-                                            <p>Paramètrages</p>
+                                            <p>Paramètres</p>
                                         </a>
                                     </li>
                                 </ul>

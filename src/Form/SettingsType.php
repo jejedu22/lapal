@@ -12,6 +12,8 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ColorType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 class SettingsType extends AbstractType
 {
@@ -53,6 +55,23 @@ class SettingsType extends AbstractType
                 ]);
                 // dump ($form);
                 // die;
+            }
+            elseif (!$settings || 2 === $settings->getId() || 6 === $settings->getId()){
+                $form->add('value', FileType::class, [
+
+                // unmapped means that this field is not associated to any entity property
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File([
+                        'maxSize' => '100k',
+                        'mimeTypes' => [
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
+                    ])
+                ],
+            ]);
             }
             else {
                 $form->add('value');

@@ -6,18 +6,15 @@
     <h1>Paramètres</h1>
 
     <table class="table">
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Valeur</th>
-                <th>Action</th>
-            </tr>
-        </thead>
         <tbody>
         {% for setting in settings %}
             <tr>
                 <td>{{ setting.name |trans}}</td>
-                <td>{{ setting.value }}</td>
+                    {% if setting.name == 'color'%}
+                    <td><div class="option-index-color color-{{setting.value}}"></div></td>
+                    {% else %}
+                    <td>{{ setting.value }}</td>
+                    {% endif %}
                 <td>
                     <button type="button" class="btn btn-primary" onclick="location.href='{{ path('settings_edit', {'id': setting.id}) }}'">Modifier</button>
                 </td>
