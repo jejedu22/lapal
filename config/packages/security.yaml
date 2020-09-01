@@ -45,3 +45,6 @@ security:
         - { path: ^/synthesepoids, roles: ROLE_USER }
         - { path: ^/register, roles: ROLE_USER }
         - { path: ^/settings, roles: ROLE_USER }
+        - { path: ^/user, roles: ROLE_USER }
+        - { path: ^/livree, roles: ROLE_USER }
+

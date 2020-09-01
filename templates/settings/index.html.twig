@@ -3,30 +3,36 @@
 {% block title %}Paramètres{% endblock %}
 
 {% block body %}
-    <h1>Paramètres</h1>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Paramètres</h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive p-0">
 
-    <table class="table">
-        <tbody>
-        {% for setting in settings %}
-            <tr>
-                <td>{{ setting.name |trans}}</td>
-                    {% if setting.name == 'color'%}
-                    <td><div class="option-index-color color-{{setting.value}}"></div></td>
-                    {% elseif setting.name == 'logo'%}
-                    <td><img src='{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}' alt="logo" class="brand-image img-circle elevation-3 navbar-{{ options_settings.get('color') }}" style="opacity: .8; max-height: 50px;"></td>
+                <table  class="table table-hover text-nowrap">
+                    <tbody>
+                    {% for setting in settings %}
+                        <tr onclick="document.location = '{{ path('settings_edit', {'id': setting.id}) }}';">
+                            <td>{{ setting.name |trans}}</td>
+                                {% if setting.name == 'color'%}
+                                <td><div class="option-index-color color-{{setting.value}}"></div></td>
+                                {% elseif setting.name == 'logo'%}
+                                <td><img src='{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}' alt="logo" class="brand-image img-circle elevation-3 navbar-{{ options_settings.get('color') }}" style="opacity: .8; max-height: 50px;"></td>
 
+                                {% else %}
+                                <td>{{ setting.value }}</td>
+                                {% endif %}
+                        </tr>
                     {% else %}
-                    <td>{{ setting.value }}</td>
-                    {% endif %}
-                <td>
-                    <button type="button" class="btn btn-primary" onclick="location.href='{{ path('settings_edit', {'id': setting.id}) }}'">Modifier</button>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        <tr>
+                            <td colspan="4">no records found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>                
 {% endblock %}
