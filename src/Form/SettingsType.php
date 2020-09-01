@@ -66,6 +66,7 @@ class SettingsType extends AbstractType
                             'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
                         ])
                     ],
+                    'label' => 'Coisir un Fichier',
                 ]);
             }
             elseif (!$settings || 5 === $settings->getId()){
