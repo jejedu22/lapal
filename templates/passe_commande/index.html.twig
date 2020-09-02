@@ -38,7 +38,11 @@
                             {% else %}
                                 <tr class="table-warning">
                                     <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
-                                    <td>COMPLET</td>
+                                    {% if jour_distrib.closed == true %}
+                                        <td>FERMÉ</td>
+                                    {% else %}
+                                        <td>COMPLET</td>
+                                    {% endif %}
                                 </tr>
                             {% endif %}
                         {% endif %}
