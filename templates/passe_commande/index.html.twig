@@ -30,7 +30,7 @@
                     <tbody>
                     {% for jour_distrib in jour_distribs %}
                         {% if jour_distrib.date|date('Y-m-d') >= "now"|date('Y-m-d') %}
-                            {% if jour_distrib.poidRestant < jour_distrib.total and jour_distrib.date|date('Y-m-d') > "now"|date('Y-m-d') %}
+                            {% if jour_distrib.poidRestant < jour_distrib.total and jour_distrib.date|date('Y-m-d') > "now"|date('Y-m-d') and jour_distrib.closed == false %}
                                 <tr onclick="document.location = '{{ path('passe_commande_new', {'idJourDistrib': jour_distrib.id}) }}';">
                                     <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
                                     <td>{{ (jour_distrib.total - jour_distrib.poidRestant)|round(1, 'ceil')|default(0)}} kg</td>
