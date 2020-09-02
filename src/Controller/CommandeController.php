@@ -57,8 +57,8 @@ class CommandeController extends AbstractController
         $cookie = $request->cookies->get('commande');
 
         $form = $this->createForm(CommandeType::class, $commande, [
-            'lastNom' => $contentCookie->nom,
-            'lastPrenom' => $contentCookie->prenom,
+            'lastNom' => $cookie->nom,
+            'lastPrenom' => $cookie->prenom,
         ]);
         $form->handleRequest($request);
 

@@ -128,78 +128,88 @@ class DefaultController extends AbstractController
         $commande = new Commande();
         $jourDistrib = $jourDistribRepository->findOneById($idJourDistrib);
         $pains = $jourDistrib->getPains();
+        if ( $jourDistrib->getClosed() === false ) {
 
-        $request = Request::createFromGlobals();
-        $cookie = $request->cookies->get('commande');
-        $nom = "";
-        $prenom = "";
-        if (isset($cookie)) {
-            $contentCookie = json_decode($cookie);
-            $nom = $contentCookie->nom;
-            $prenom = $contentCookie->prenom;
-        }
-
-        $form = $this->createForm(CommandeType::class, $commande, [
-            'pains' => $pains, 
-            'idJourDistrib' => $idJourDistrib, 
-            'jourDistrib' => $jourDistrib,
-            'lastNom' => $nom,
-            'lastPrenom' => $prenom,
-            ]);
-        $form->handleRequest($request);
-        
-        if ($form->isSubmitted() && $form->isValid()) {
-            // On récupère la somme des poids des pain de la commande
-            $poidCommande = 0;
-            foreach ($form->getData()->getLigneCommandes() as $ligneCommande ){
-                $poidCommande += $ligneCommande->getPain()->getPoid() * floatval($ligneCommande->getQuantite());
+            $request = Request::createFromGlobals();
+            $cookie = $request->cookies->get('commande');
+            $nom = "";
+            $prenom = "";
+            if (isset($cookie)) {
+                $contentCookie = json_decode($cookie);
+                $nom = $contentCookie->nom;
+                $prenom = $contentCookie->prenom;
             }
+    
+            $form = $this->createForm(CommandeType::class, $commande, [
+                'pains' => $pains, 
+                'idJourDistrib' => $idJourDistrib, 
+                'jourDistrib' => $jourDistrib,
+                'lastNom' => $nom,
+                'lastPrenom' => $prenom,
+                ]);
+            $form->handleRequest($request);
             
-            // On additionne avec le poid restant du jour
-            $poidRestant = $form->getData()->getJourDistrib()->getPoidRestant();
-            $poidRestant += $poidCommande;
-            
-            if ($poidRestant <= $form->getData()->getJourDistrib()->getTotal()) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                // On récupère la somme des poids des pain de la commande
+                $poidCommande = 0;
+                foreach ($form->getData()->getLigneCommandes() as $ligneCommande ){
+                    $poidCommande += $ligneCommande->getPain()->getPoid() * floatval($ligneCommande->getQuantite());
+                }
                 
-                $form->getData()->getJourDistrib()->setPoidRestant($poidRestant);
-
-                $entityManager = $this->getDoctrine()->getManager();
-                $entityManager->persist($commande);
-                $entityManager->flush();
-
-                $cookieValue = [
-                    'command_id' => $commande->getId(),
-                    'nom' => $commande->getNom(),
-                    'prenom' => $commande->getPrenom(),
-                ];
-
-                $coockie = new Cookie('commande', json_encode($cookieValue), time() + ( 2 * 365 * 24 * 60 * 60));
-                $response = $this->redirectToRoute('commande_index');
-                $response->headers->setCookie($coockie);
-
-                $this->addFlash(
-                    'success',
-                    'La commande a été enregistrée'
-                );            
+                // On additionne avec le poid restant du jour
+                $poidRestant = $form->getData()->getJourDistrib()->getPoidRestant();
+                $poidRestant += $poidCommande;
+                
+                if ($poidRestant <= $form->getData()->getJourDistrib()->getTotal()) {
                     
-                return $response;
+                    $form->getData()->getJourDistrib()->setPoidRestant($poidRestant);
+    
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->persist($commande);
+                    $entityManager->flush();
+    
+                    $cookieValue = [
+                        'command_id' => $commande->getId(),
+                        'nom' => $commande->getNom(),
+                        'prenom' => $commande->getPrenom(),
+                    ];
+    
+                    $coockie = new Cookie('commande', json_encode($cookieValue), time() + ( 2 * 365 * 24 * 60 * 60));
+                    $response = $this->redirectToRoute('commande_index');
+                    $response->headers->setCookie($coockie);
+    
+                    $this->addFlash(
+                        'success',
+                        'La commande a été enregistrée'
+                    );            
+                        
+                    return $response;
+                }
+                else {
+                    $this->addFlash(
+                        'warning',
+                        'La limite de poid disponible a été dépassée !'
+                    );
+                    return $this->redirectToRoute('passe_commande_index');
+                }
+                
             }
-            else {
-                $this->addFlash(
-                    'warning',
-                    'La limite de poid disponible a été dépassée !'
-                );
-                return $this->redirectToRoute('passe_commande_index');
-            }
-            
+    
+            return $this->render('commande/new.html.twig', [
+                'commande' => $commande,
+                'form' => $form->createView(),
+                'pains' => $pains,
+                'idJourDistrib' => $jourDistrib,
+            ]);
+        } 
+        else {
+            $this->addFlash(
+                'warning',
+                'La commande est fermée'
+            );
+            return $this->redirectToRoute('passe_commande_index');
         }
 
-        return $this->render('commande/new.html.twig', [
-            'commande' => $commande,
-            'form' => $form->createView(),
-            'pains' => $pains,
-            'idJourDistrib' => $jourDistrib,
-        ]);
     }
 
 }

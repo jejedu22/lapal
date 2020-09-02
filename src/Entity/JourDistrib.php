@@ -43,6 +43,11 @@ class JourDistrib
      */
     private $poidRestant;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $closed;
+
     public function __construct()
     {
         $this->pains = new ArrayCollection();
@@ -153,6 +158,18 @@ class JourDistrib
     public function setPoidRestant(?float $poidRestant): self
     {
         $this->poidRestant = $poidRestant;
+
+        return $this;
+    }
+
+    public function getClosed(): ?bool
+    {
+        return $this->closed;
+    }
+
+    public function setClosed(?bool $closed): self
+    {
+        $this->closed = $closed;
 
         return $this;
     }

@@ -10,12 +10,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class JourDistribType extends AbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $builder->add('closed', CheckboxType::class, [
+            'label'    => 'Fermer la vente',
+            'required' => false,
+        ]);
         if ($options['edit']){
             $builder
                 ->add('pains', EntityType::class, [
