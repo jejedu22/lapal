@@ -52,11 +52,13 @@ class DefaultController extends AbstractController
                 break;
             case 1:
                 $order = 'DESC';
-                $jourDistribs = $jourDistribRepository->findAllOrder($order);
+                $limit = 100;
+                $jourDistribs = $jourDistribRepository->findAllOrder($order, $limit);
                 break;
             case 2:
                 $order = 'DESC';
-                $jourDistribs = $jourDistribRepository->findAllOrder($order);
+                $limit = 100;
+                $jourDistribs = $jourDistribRepository->findAllOrder($order, $limit);
                 break;
             default:
                 $order = 'ASC';

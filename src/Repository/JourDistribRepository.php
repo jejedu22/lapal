@@ -39,9 +39,9 @@ class JourDistribRepository extends ServiceEntityRepository
         ;
     }
     */
-    public function findAllOrder($order)
+    public function findAllOrder($order, $limit = 40)
     {
-        return $this->findBy(array(), array('date' => $order));
+        return $this->findBy(array(), array('date' => $order),$limit);
     }
 
     public function findAllActive()
