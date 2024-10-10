@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Boulanger index{% endblock %}
+
+{% block body %}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Liste des boulangers</h3>
+                <div class="card-tools">
+                    <a href="{{ path('boulanger_new') }}" class="btn btn-tool btn-sm">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nom</th>
+                            <th>Prenom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for boulanger in boulangers %}
+                        
+                        <tr onclick="document.location = '{{ path('boulanger_edit', {'id': boulanger.id}) }}';">
+                            <td>{{ boulanger.id }}</td>
+                            <td>{{ boulanger.nom }}</td>
+                            <td>{{ boulanger.prenom }} kg</td>
+                            </tr>
+                        
+                    {% else %}
+                        <tr>
+                            <td colspan="5">Ya pas de Boulanger ! </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block navbar %}
+<li class="nav-item d-none d-sm-inline-block">
+    <a href="{{ path('boulanger_new') }}" class="nav-link">Ajouter un boulanger</a>
+</li>
+{% endblock %}

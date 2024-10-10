@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\JourDistrib;
 use App\Entity\Pain;
+use App\Entity\Boulanger;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -60,6 +61,11 @@ class JourDistribType extends AbstractType
             ->add('total', NumberType::class,[
                 'label' => 'Poid total de la fournée (en kg)'
             ])
+            ->add('boulanger', EntityType::class,[
+                'class' => Boulanger::class,
+                'choice_label' => 'prenom'
+            ])
+            ->add('commentaire')
             ;
     }
 

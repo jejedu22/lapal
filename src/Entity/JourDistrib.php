@@ -48,6 +48,16 @@ class JourDistrib
      */
     private $closed;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Boulanger", inversedBy="jourDistribs")
+     */
+    private $boulanger;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $commentaire;
+
     public function __construct()
     {
         $this->pains = new ArrayCollection();
@@ -170,6 +180,30 @@ class JourDistrib
     public function setClosed(?bool $closed): self
     {
         $this->closed = $closed;
+
+        return $this;
+    }
+
+    public function getBoulanger(): ?Boulanger
+    {
+        return $this->boulanger;
+    }
+
+    public function setBoulanger(?Boulanger $boulanger): self
+    {
+        $this->boulanger = $boulanger;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): self
+    {
+        $this->commentaire = $commentaire;
 
         return $this;
     }
