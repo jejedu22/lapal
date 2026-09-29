@@ -1,0 +1,66 @@
+services:
+  app:
+    build: .
+    image: lapal:latest
+    container_name: lapal-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: "0"
+      APP_SECRET: ${APP_SECRET:?APP_SECRET manquant}
+      DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?serverVersion=mariadb-10.11.0&charset=utf8mb4
+      # Traefik est sur un réseau Docker privé : on lui fait confiance pour X-Forwarded-*
+      # (nécessaire pour que Symfony sache qu'il est servi en HTTPS : cookies, redirections…)
+      TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-1}
+    volumes:
+      - uploads:/var/www/html/public/uploads
+      - sessions:/var/www/html/var/sessions
+      - logs:/var/www/html/var/log
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.lapal.rule=Host(`${LAPAL_HOST}`)
+      - traefik.http.routers.lapal.entrypoints=websecure
+      - traefik.http.routers.lapal.tls.certresolver=letsencrypt
+      - traefik.http.routers.lapal.middlewares=default@file
+      - traefik.http.services.lapal.loadbalancer.server.port=80
+
+  db:
+    image: mariadb:10.11
+    container_name: lapal-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD manquant}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - default   # jamais exposée sur le réseau proxy
+
+volumes:
+  db:
+  uploads:
+  sessions:
+  logs:
+
+networks:
+  default:
+    name: lapal
+  proxy:
+    external: true   # créé par le dépôt traefik
