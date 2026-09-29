@@ -196,6 +196,68 @@ class JourDistrib
         return $this;
     }
 
+    /**
+     * poidRestant contient en réalité le poids déjà commandé pour ce jour.
+     */
+    public function getPoidsCommande(): float
+    {
+        return (float) $this->poidRestant;
+    }
+
+    public function getPoidsDisponible(): float
+    {
+        return max(0.0, round((float) $this->total - $this->getPoidsCommande(), 3));
+    }
+
+    /**
+     * Pourcentage de la fournée déjà commandé (0 à 100).
+     */
+    public function getTauxRemplissage(): int
+    {
+        if ((float) $this->total <= 0) {
+            return 100;
+        }
+
+        return (int) min(100, round($this->getPoidsCommande() * 100 / $this->total));
+    }
+
+    public function isPasse(): bool
+    {
+        return null !== $this->date && $this->date->format('Y-m-d') < date('Y-m-d');
+    }
+
+    public function isAujourdhui(): bool
+    {
+        return null !== $this->date && $this->date->format('Y-m-d') === date('Y-m-d');
+    }
+
+    /**
+     * État du jour vu par un client :
+     * ouvert | complet | ferme | aujourdhui | passe
+     */
+    public function getStatut(): string
+    {
+        if ($this->isPasse()) {
+            return 'passe';
+        }
+        if ($this->closed) {
+            return 'ferme';
+        }
+        if ($this->isAujourdhui()) {
+            return 'aujourdhui';
+        }
+        if ($this->getPoidsDisponible() <= 0) {
+            return 'complet';
+        }
+
+        return 'ouvert';
+    }
+
+    public function isOuvert(): bool
+    {
+        return 'ouvert' === $this->getStatut();
+    }
+
     public function getCommentaire(): ?string
     {
         return $this->commentaire;

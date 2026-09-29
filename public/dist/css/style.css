@@ -80,3 +80,73 @@
 .colors-table td {
     margin: 10px 1px;
 }
+/* ------------------------------------------------------------------ */
+/* Mise en page générale                                               */
+/* ------------------------------------------------------------------ */
+.titre-accueil {
+    text-align: center;
+    font-size: 1.9rem;
+    margin: .25rem 0 .5rem;
+}
+@media (max-width: 575.98px) {
+    .titre-accueil { font-size: 1.5rem; }
+}
+.main-footer { padding: .6rem 1rem; }
+.nav-sidebar .nav-header { font-size: .75rem; letter-spacing: .05em; opacity: .7; }
+
+/* Lignes de tableau cliquables (le lien couvre toute la ligne) */
+.table-lien tbody tr { cursor: pointer; }
+.table-lien td > a.lien-ligne { color: inherit; display: block; }
+.table-lien td > a.lien-ligne:focus { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ */
+/* Parcours client                                                     */
+/* ------------------------------------------------------------------ */
+.carte-jour { transition: box-shadow .15s; }
+.carte-jour--indisponible { opacity: .75; }
+.date-bloc {
+    min-width: 3.4rem;
+    text-align: center;
+    border-radius: .5rem;
+    background: #f4f6f9;
+    border: 1px solid #dee2e6;
+    padding: .25rem .4rem;
+    line-height: 1.1;
+}
+.date-bloc__jour { display: block; font-size: 1.6rem; font-weight: 700; }
+.date-bloc__mois { display: block; font-size: .8rem; text-transform: uppercase; color: #6c757d; }
+.badge-statut { font-size: .9rem; padding: .45em .7em; white-space: normal; text-align: left; }
+
+.ligne-pain--choisie { background: #f1f8f3; }
+.stepper { display: flex; align-items: center; flex-shrink: 0; }
+.stepper__btn { width: 2.6rem; height: 2.6rem; padding: 0; border-radius: 50%; }
+.stepper__valeur {
+    width: 3.2rem;
+    margin: 0 .35rem;
+    text-align: center;
+    font-weight: 700;
+    -moz-appearance: textfield;
+}
+.stepper__valeur::-webkit-outer-spin-button,
+.stepper__valeur::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ------------------------------------------------------------------ */
+/* Suivi des livraisons                                                */
+/* ------------------------------------------------------------------ */
+.suivi-ligne { display: flex; align-items: flex-start; }
+.suivi-ligne.livree .suivi-nom { text-decoration: line-through; color: #6c757d; }
+.suivi-case { width: 1.6rem; height: 1.6rem; margin: .15rem .9rem 0 0; flex-shrink: 0; cursor: pointer; }
+.suivi-detail { font-size: .9rem; color: #495057; }
+
+/* ------------------------------------------------------------------ */
+/* Impression (bon de préparation, synthèses)                          */
+/* ------------------------------------------------------------------ */
+@media print {
+    .main-header, .main-sidebar, .main-footer, .no-print, .card-tools, .alert { display: none !important; }
+    .content-wrapper { margin-left: 0 !important; background: #fff !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6; break-inside: avoid; }
+    .collapsed-card .card-body { display: block !important; }
+    a[href]::after { content: none !important; }
+}
+.card-body.p-0 .table tfoot > tr > td:first-of-type { padding-left: 1.5rem; }
+.card-body.p-0 .table tfoot > tr > td:last-of-type { padding-right: 1.5rem; }

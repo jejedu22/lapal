@@ -19,6 +19,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 use App\Repository\JourDistribRepository;
 
@@ -34,6 +36,31 @@ class CommandeType extends AbstractType
     
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if ($options['client']) {
+            // Parcours client : les quantités par pain sont saisies à part (quantites[idPain])
+            $builder
+                ->add('prenom', TextType::class, [
+                    'label' => 'Prénom',
+                    'required' => true,
+                    'attr' => ['autocomplete' => 'given-name'],
+                    'empty_data' => '',
+                    'constraints' => [new NotBlank(['message' => 'Indiquez votre prénom.']), new Length(['max' => 255])],
+                ])
+                ->add('nom', TextType::class, [
+                    'label' => 'Nom',
+                    'required' => true,
+                    'attr' => ['autocomplete' => 'family-name'],
+                    'empty_data' => '',
+                    'constraints' => [new NotBlank(['message' => 'Indiquez votre nom.']), new Length(['max' => 255])],
+                ])
+                ->add('commentaire', TextareaType::class, [
+                    'label' => 'Commentaire pour le boulanger',
+                    'required' => false,
+                    'attr' => ['rows' => 2, 'placeholder' => 'Ex. : bien cuit, je passe en fin de distribution…'],
+                ]);
+
+            return;
+        }
 
         $builder
             ->add('jourDistrib', EntityType::class, [
@@ -50,7 +77,7 @@ class CommandeType extends AbstractType
                 ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom : ',
-                'required' => true,            
+                'required' => true,
                 'data' => $options['lastPrenom']
             ])
             ->add('ligneCommandes', CollectionType::class, [
@@ -65,12 +92,11 @@ class CommandeType extends AbstractType
                 'delete_empty' => true,
             ])
             ->add('commentaire', TextareaType::class, [
-                'required' => false,   
+                'required' => false,
             ])
             ->add('livree', HiddenType::class, [
                 'data' => 0,
             ])
-            // ->addEventListener(FormEvents::PRE_SUBMIT, $listener);
         ;
     }
 
@@ -83,7 +109,9 @@ class CommandeType extends AbstractType
             'jourDistrib' => JourDistrib::class,
             'lastNom' => null,
             'lastPrenom' => null,
+            'client' => false,
         ]);
+        $resolver->setAllowedTypes('client', 'bool');
         $resolver->setAllowedTypes('idJourDistrib', 'int');
     }
 }

@@ -1,241 +1,151 @@
+{% set route = app.request.attributes.get('_route') %}
+{% set route_params = app.request.attributes.get('_route_params') ?? {} %}
+{% set couleur = options_settings.get('color', 'orange') %}
+{% set nom_appli = options_settings.get('name', 'Lapal') %}
+{% set logo = options_settings.get('logo') %}
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% block title %}LAPAL{% endblock %}</title>
-          
-        <!-- Font Awesome Icons -->
-        <link rel="stylesheet" href="{{asset('plugins/fontawesome/css/all.min.css')}}">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="{{asset('dist/css/adminlte.min.css')}}">
-        <!-- Google Font: Source Sans Pro -->
-        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{asset('plugins/jquery-ui/jquery-ui.min.css')}}">
-        <link rel="stylesheet" href="{{asset('dist/css/style.css')}}">
-        <link rel="shortcut icon" type="image/svg+xml" href="{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}">
-        {% block stylesheets %}
-        {% endblock %}
-        <!-- DatePicker -->
-        <link rel="stylesheet" href="{{asset('plugins/datepicker/datepicker3.css')}}">
+        <title>{% block title %}{{ nom_appli }}{% endblock %} · {{ nom_appli }}</title>
+
+        <link rel="stylesheet" href="{{ asset('plugins/fontawesome/css/all.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('fonts/source-sans-pro.css') }}">
+        <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('plugins/jquery-ui/jquery-ui.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
+        <link rel="stylesheet" href="{{ asset('dist/css/style.css') }}">
+        {% block stylesheets %}{% endblock %}
+
+        {# Installation sur l'écran d'accueil des téléphones #}
+        <link rel="manifest" href="{{ path('app_manifest') }}">
+        <meta name="theme-color" content="{{ couleur_hex(couleur) }}">
+        {% if logo %}
+            <link rel="icon" type="image/png" href="{{ asset('uploads/logo/' ~ logo) }}">
+            <link rel="apple-touch-icon" href="{{ asset('uploads/logo/' ~ logo) }}">
+        {% endif %}
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="{{ nom_appli }}">
     </head>
-    <body>
+    <body class="hold-transition sidebar-mini layout-fixed">
         <div class="wrapper">
 
-            <!-- Navbar -->
-            <nav class="main-header navbar navbar-expand navbar-dark navbar-{{ options_settings.get('color') }}">
-                <!-- Left navbar links -->
+            <nav class="main-header navbar navbar-expand navbar-dark navbar-{{ couleur }}">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                        <a class="nav-link" data-widget="pushmenu" href="#" role="button" aria-label="Afficher / masquer le menu"><i class="fas fa-bars" aria-hidden="true"></i></a>
                     </li>
-                    
-                    {% block navbar %}
-                    {% endblock %}
-                
+                    {% block navbar %}{% endblock %}
                 </ul>
 
-                <!-- Right navbar links -->
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        {{ options_settings.getObfuscatedEmailLink(options_settings.get('contact_email')) | raw }}
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button"><i class="fas fa-th-large"></i></a>
-                    </li>
+                    {% if options_settings.get('contact_email') %}
+                        <li class="nav-item" title="Nous écrire">
+                            {{ options_settings.getObfuscatedEmailLink(options_settings.get('contact_email'), {'aria-label': 'Nous écrire'}) | raw }}
+                        </li>
+                    {% endif %}
                 </ul>
             </nav>
-            <!-- /.navbar -->
 
-            <!-- Main Sidebar Container -->
-            <aside class="main-sidebar elevation-4 sidebar-dark-{{ options_settings.get('color') }}">
-                <!-- Brand Logo -->
-                <a href="/" class="brand-link navbar-{{ options_settings.get('color') }}">
-                    <img src="{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}" alt="lapal Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                    <span class="brand-text font-weight-light">{{ options_settings.get('name') }}</span>
+            {% macro lien(label, icone, url, actif) %}
+                <li class="nav-item">
+                    <a href="{{ url }}" class="nav-link{{ actif ? ' active' }}"{{ actif ? ' aria-current="page"' }}>
+                        <i class="nav-icon {{ icone }}" aria-hidden="true"></i>
+                        <p>{{ label }}</p>
+                    </a>
+                </li>
+            {% endmacro %}
+            {% import _self as menu %}
+
+            <aside class="main-sidebar elevation-4 sidebar-dark-{{ couleur }}">
+                <a href="{{ path('passe_commande_index') }}" class="brand-link navbar-{{ couleur }}">
+                    {% if logo %}
+                        <img src="{{ asset('uploads/logo/' ~ logo) }}" alt="" class="brand-image img-circle elevation-3">
+                    {% endif %}
+                    <span class="brand-text font-weight-light">{{ nom_appli }}</span>
                 </a>
 
-                <!-- Sidebar -->
-                <div class="nav-sidebar">
-
-                    <!-- Sidebar Menu -->
-                    <nav class="mt-2">
-                        <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent nav-flat" data-widget="treeview" role="menu" data-accordion="false">
-                        <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                            {% if is_granted('ROLE_USER') %}
-                            <li class="nav-item has-treeview menu-open">
-                                <a href="#" class="nav-link active">
-                                    <i class="nav-icon fas fa-tools"></i>
-                                    <p>
-                                        Administration
-                                        <i class="right fas fa-angle-left"></i>
-                                    </p>
-                                </a>
-
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="{{ path('pain_index') }}" class="nav-link active">
-                                            <i class="fas fa-bread-slice nav-icon"></i>
-                                            <p>Ajouter des pains</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('jour_distrib_index') }}" class="nav-link active">
-                                            <i class="far fa-calendar-alt nav-icon"></i>
-                                            <p>Jours de Distribution</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('synthese_index', {'suivi': 1 }) }}" class="nav-link active">
-                                            <i class="fas fa-bicycle nav-icon"></i>
-                                            <p>Suivi livraison</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('synthese_index', {'suivi': 2 }) }}" class="nav-link active">
-                                            <i class="fas fa-list-ul nav-icon"></i>
-                                            <p>Toutes les commandes</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ path('synthese_poids') }}" class="nav-link active">
-                                            <i class="fas fa-balance-scale-right nav-icon"></i>
-                                            <p>Synthèse des poids</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item has-treeview">
-                                        <a href="#" class="nav-link active">
-                                            <i class="fas fa-tools nav-icon"></i>
-                                            <p>Paramètres
-                                            <i class="right fas fa-angle-left"></i>
-                                            </p>
-                                        </a>
-                                        <ul class="nav nav-treeview">
-
-                                            <li class="nav-item">
-                                                <a href="{{ path('settings_index') }}" class="nav-link active">
-                                                    <i class="fas fa-cogs nav-icon"></i>
-                                                    <p>Configuration</p>
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="{{ path('boulanger_index') }}" class="nav-link active">
-                                                    <i class="fas fa-user nav-icon"></i>
-                                                    <p>Boulangers</p>
-                                                </a>
-                                            </li>
-                                            <li class="nav-item">
-                                                <a href="{{ path('user_index') }}" class="nav-link active">
-                                                    <i class="fas fa-users nav-icon"></i>
-                                                    <p>Utilisateurs</p>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
+                <div class="sidebar">
+                    <nav class="mt-2" aria-label="Menu principal">
+                        <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
+                            {{ menu.lien('Passer commande', 'fas fa-shopping-basket', path('passe_commande_index'), route in ['passe_commande_index', 'passe_commande_new']) }}
+                            {% if app.request.cookies.has('commande') %}
+                                {{ menu.lien('Ma commande', 'fas fa-receipt', path('commande_index'), route in ['commande_index', 'commande_edit']) }}
                             {% endif %}
-                            <li class="nav-item">
-                                <a href="{{ path('commande_index') }}" class="nav-link active danger">
-                                    <i class="fas fa-bookmark nav-icon"></i>
-                                    <p>Ma dernière Commande</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ path('synthese_index', {'suivi': 0 }) }}" class="nav-link active danger">
-                                    <i class="fas fa-list-ul nav-icon"></i>
-                                    <p>Synthèse des Commandes</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ path('passe_commande_index') }}" class="nav-link active danger">
-                                    <i class="fas fa-shopping-bag nav-icon"></i>
-                                    <p>Passer Commandes</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ path('app_login') }}" class="nav-link active danger">
-                                    <i class="fas fa-key nav-icon"></i>
-                                    <p>Connexion</p>
-                                </a>
-                            </li>
+                            {{ menu.lien('Commandes à venir', 'fas fa-list-ul', path('synthese_index', {'suivi': 0}), route == 'synthese_index' and route_params.suivi == 0) }}
+
+                            {% if is_granted('ROLE_USER') %}
+                                <li class="nav-header">DISTRIBUTION</li>
+                                {{ menu.lien('Suivi des livraisons', 'fas fa-check-double', path('synthese_index', {'suivi': 1}), route == 'synthese_index' and route_params.suivi == 1) }}
+                                {{ menu.lien('Toutes les commandes', 'fas fa-archive', path('synthese_index', {'suivi': 2}), route == 'synthese_index' and route_params.suivi == 2) }}
+                                {{ menu.lien('Synthèse des poids', 'fas fa-balance-scale', path('synthese_poids'), route == 'synthese_poids') }}
+
+                                <li class="nav-header">ADMINISTRATION</li>
+                                {{ menu.lien('Jours de distribution', 'far fa-calendar-alt', path('jour_distrib_index'), route starts with 'jour_distrib') }}
+                                {{ menu.lien('Pains', 'fas fa-bread-slice', path('pain_index'), route starts with 'pain_') }}
+                                {{ menu.lien('Boulangers', 'fas fa-user-tie', path('boulanger_index'), route starts with 'boulanger') }}
+                                {{ menu.lien('Configuration', 'fas fa-cogs', path('settings_index'), route starts with 'settings') }}
+                                {{ menu.lien('Utilisateurs', 'fas fa-users', path('user_index'), route starts with 'user_' or route == 'app_register') }}
+
+                                <li class="nav-header">{{ app.user.username|upper }}</li>
+                                {{ menu.lien('Déconnexion', 'fas fa-sign-out-alt', path('app_logout'), false) }}
+                            {% else %}
+                                <li class="nav-header">ÉQUIPE</li>
+                                {{ menu.lien('Connexion', 'fas fa-key', path('app_login'), route == 'app_login') }}
+                            {% endif %}
                         </ul>
                     </nav>
-                <!-- /.sidebar-menu -->
                 </div>
-            <!-- /.sidebar -->
             </aside>
-            <!-- Content Wrapper. Contains page content -->
+
             <div class="content-wrapper">
-                <!-- Content Header (Page header) -->
                 <div class="content-header">
                     <div class="container-fluid">
-                        <div class="row mb-2">
-                            <div class="col-md-12">
-                            {% block titre_page %}
-                                <h1 class="s-0 text-dark"><center> 	{{ options_settings.get('welcome_text') |raw}}</center></h1>
-                            {% endblock %}
-                            </div><!-- /.col -->
-                        </div><!-- /.row -->
-                    </div><!-- /.container-fluid -->
+                        {% block titre_page %}
+                            <h1 class="titre-accueil text-dark">{{ options_settings.get('welcome_text')|raw }}</h1>
+                        {% endblock %}
+                    </div>
                 </div>
-                <!-- /.content-header -->
 
-                <!-- Main content -->
                 <div class="content">
-                    {% block modal %}
-                    {% endblock %}
+                    {% block modal %}{% endblock %}
                     <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-md-12">
-                                {% for label, messages in app.flashes %}
-                                    {% for message in messages %}
-                                        <div class="alert alert-{{ label }} alert-dismissible">
-                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                            <h4><i class="icon fa fa-warning"></i> {{ label|trans }} </h4>
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="row">
+                        {% set titres_flash = {
+                            'success': ['C’est enregistré !', 'fas fa-check-circle'],
+                            'warning': ['Attention', 'fas fa-exclamation-triangle'],
+                            'danger':  ['Erreur', 'fas fa-times-circle'],
+                            'info':    ['Information', 'fas fa-info-circle'],
+                        } %}
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                {% set titre = titres_flash[label] ?? ['Information', 'fas fa-info-circle'] %}
+                                <div class="alert alert-{{ label }} alert-dismissible" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Fermer">×</button>
+                                    <h5><i class="icon {{ titre[1] }}" aria-hidden="true"></i> {{ titre[0] }}</h5>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
 
-                            {% block body %}
-                            {% endblock %}
-
+                        <div class="row">
+                            {% block body %}{% endblock %}
                         </div>
-                        <!-- /.row -->
-                    </div><!-- /.container-fluid -->
+                    </div>
                 </div>
-                <!-- /.content -->
             </div>
-            <!-- /.content-wrapper -->
 
-            <!-- Main Footer -->
-            <footer class="main-footer">
+            <footer class="main-footer text-sm text-muted">
+                {{ nom_appli }}
             </footer>
         </div>
-        <!-- ./wrapper -->
 
-        <!-- REQUIRED SCRIPTS -->
-
-        <!-- jQuery -->
-
-        <script src="{{asset('plugins/jquery/jquery.min.js')}}"></script>
-        <script src="{{asset('plugins/jquery-ui/jquery-ui.min.js')}}"></script>
-        <!-- Bootstrap 4 -->
-        <script src="{{asset('plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-        <!-- AdminLTE App -->
-        <script src="{{asset('dist/js/adminlte.min.js')}}"></script>
-        
-        <script src="{{asset('plugins/moment/min/moment-with-locales.min.js')}}"></script>
-        <!-- DateTimePicker -->
-        <script src="{{asset('plugins/datepicker/bootstrap-datepicker.js')}}"></script>
-        {# <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script> #}
-        {% block javascripts %}
-        {% endblock %}
-
+        <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+        <script src="{{ asset('plugins/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
+        <script src="{{ asset('plugins/moment/min/moment-with-locales.min.js') }}"></script>
+        <script src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
+        {% block javascripts %}{% endblock %}
     </body>
 </html>

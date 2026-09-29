@@ -108,4 +108,42 @@ class JourDistribRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /**
+     * Quantités commandées par pain pour une liste de jours, en une seule requête.
+     *
+     * @return array<int, array<int, array{pain: int, nom: string, poid: float, prix: float, quantite: int}>>
+     *         indexé par id de jour puis par id de pain
+     */
+    public function findQuantitesParPain(array $jourIds): array
+    {
+        if (empty($jourIds)) {
+            return [];
+        }
+
+        $lignes = $this->getEntityManager()->createQuery(
+            'SELECT IDENTITY(c.jourDistrib) AS jour, p.id AS pain, p.nom, p.poid, p.prix, SUM(lc.quantite) AS quantite
+            FROM App\Entity\LigneCommande lc
+            INNER JOIN lc.commande c
+            INNER JOIN lc.pain p
+            WHERE c.jourDistrib IN (:jours)
+            GROUP BY c.jourDistrib, p.id, p.nom, p.poid, p.prix
+            ORDER BY p.nom ASC'
+        )
+        ->setParameter('jours', $jourIds)
+        ->getArrayResult();
+
+        $resultat = [];
+        foreach ($lignes as $ligne) {
+            $resultat[(int) $ligne['jour']][(int) $ligne['pain']] = [
+                'pain' => (int) $ligne['pain'],
+                'nom' => $ligne['nom'],
+                'poid' => (float) $ligne['poid'],
+                'prix' => (float) $ligne['prix'],
+                'quantite' => (int) $ligne['quantite'],
+            ];
+        }
+
+        return $resultat;
+    }
 }

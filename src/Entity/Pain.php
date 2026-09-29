@@ -43,9 +43,16 @@ class Pain
      */
     private $jourDistribs;
 
+    /**
+     * Un pain archivé n'est plus proposé pour les nouveaux jours de distribution.
+     *
+     * @ORM\Column(type="boolean", options={"default": true})
+     */
+    private $actif = true;
+
     public function __construct()
     {
-        $this->ligneCommande1s = new ArrayCollection();
+        $this->ligneCommandes = new ArrayCollection();
         $this->jourDistribs = new ArrayCollection();
     }
 
@@ -147,5 +154,22 @@ class Pain
         }
 
         return $this;
+    }
+
+    public function getActif(): bool
+    {
+        return (bool) $this->actif;
+    }
+
+    public function setActif(bool $actif): self
+    {
+        $this->actif = $actif;
+
+        return $this;
+    }
+
+    public function getLibelle(): string
+    {
+        return $this->nom . ' - ' . str_replace('.', ',', (string) $this->poid) . ' kg';
     }
 }

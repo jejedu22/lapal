@@ -1,72 +1,93 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Commandes{% endblock %}
+{% block title %}Ma commande{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Ma commande</h1>
+{% endblock %}
 
 {% block body %}
-{% if commande is null %}
-    <meta http-equiv="refresh" content="0;URL=/"> 
-{% else %}
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">{{ commande.prenom }} {{ commande.nom }}</br>
-                {{ commande.jourDistrib.date|format_datetime('full', 'none', locale='fr') }}</h5>
-                <div class="card-tools">
-                    {{ include('commande/_delete_form.html.twig') }}
-                </div>
-            </div>
-            <div class="card-body table-responsive p-0">
-                <table class="table table-sm">
-
-                    <thead>
-                        <tr>
-                            <th>Pain</th>
-                            <th>Nb</th>
-                            <th>Prix</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% set total = 0 %}
-                    {% for ligne_commande in commande.lignecommandes %}
-                        {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}
-                        {% set total = total+somme %}
-                        <tr>
-                            <td>{{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg</td>
-                            <td>{{ ligne_commande.quantite }}</td>
-                            <td>{{ somme }} €</td>
-                            <td>{{ include('ligne_commande/_delete_form.html.twig') }}</td>
-                        </tr>
-                    {% endfor %}
-                        <tr>
-                            <td colspan=2 align=right>Total</td>
-                            <td>{{ total }}€</td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="card-footer">
-                Commentaire : {{ commande.commentaire }}
+{% set jour = commande.jourDistrib %}
+{% set modifiable = jour.statut in ['ouvert', 'complet'] %}
+<div class="col-12 col-lg-8 col-xl-6">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                {{ commande.prenom }} {{ commande.nom }}
+            </h2>
+            <div class="card-tools">
+                {% if commande.livree %}
+                    <span class="badge badge-success"><i class="fas fa-check" aria-hidden="true"></i> Livrée</span>
+                {% endif %}
             </div>
         </div>
+        <div class="card-body pb-0">
+            <p class="mb-1">
+                <i class="far fa-calendar-alt text-muted" aria-hidden="true"></i>
+                <strong>{{ jour.date|format_datetime('full', 'none', locale='fr')|capitalize }}</strong>
+            </p>
+            {% if jour.boulanger %}
+                <p class="mb-1"><i class="fas fa-user-tie text-muted" aria-hidden="true"></i> {{ jour.boulanger.prenom }} {{ jour.boulanger.nom }}</p>
+            {% endif %}
+            {% if jour.commentaire %}
+                <p class="mb-1"><i class="fas fa-map-marker-alt text-muted" aria-hidden="true"></i> {{ jour.commentaire }}</p>
+            {% endif %}
+        </div>
+        <div class="card-body p-0 mt-2">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Pain</th>
+                        <th scope="col" class="text-center">Qté</th>
+                        <th scope="col" class="text-right">Prix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% set total = 0 %}
+                {% set poids = 0 %}
+                {% for ligne in commande.ligneCommandes %}
+                    {% set somme = ligne.quantite * ligne.pain.prix %}
+                    {% set total = total + somme %}
+                    {% set poids = poids + ligne.quantite * ligne.pain.poid %}
+                    <tr>
+                        <td>{{ ligne.pain.nom }} <span class="text-muted small">{{ ligne.pain.poid|kg }}</span></td>
+                        <td class="text-center">{{ ligne.quantite }}</td>
+                        <td class="text-right text-nowrap">{{ somme|euros }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="3" class="text-muted">Aucun pain dans cette commande.</td></tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="font-weight-bold">
+                        <td>Total <span class="text-muted small font-weight-normal">{{ poids|kg }}</span></td>
+                        <td></td>
+                        <td class="text-right text-nowrap">{{ total|euros }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% if commande.commentaire %}
+            <div class="card-body border-top">
+                <span class="text-muted">Commentaire :</span> {{ commande.commentaire }}
+            </div>
+        {% endif %}
+        <div class="card-footer">
+            {% if modifiable %}
+                <a href="{{ path('commande_edit', {'id': commande.id}) }}" class="btn btn-primary">
+                    <i class="fas fa-pen" aria-hidden="true"></i> Modifier
+                </a>
+                <div class="float-right">
+                    {{ include('commande/_delete_form.html.twig', {'libelle': 'Annuler la commande'}) }}
+                </div>
+            {% else %}
+                <span class="text-muted small">Cette commande ne peut plus être modifiée.</span>
+            {% endif %}
+        </div>
     </div>
-{% endif %}
-{% endblock %}
 
-{% block navbar %}
-    <li class="nav-item d-none d-sm-inline-block">
-        <a href="{{ path('passe_commande_index') }}" class="nav-link">Passer une commande</a>
-    </li> 
-{% endblock %}
-
-{% block modal %}
-
-{% endblock %}
-
-{% block javascript %}
-
-<script>
-
-</script>
+    <a href="{{ path('passe_commande_index') }}" class="btn btn-outline-secondary btn-block">
+        <i class="fas fa-shopping-basket" aria-hidden="true"></i> Commander pour un autre jour
+    </a>
+</div>
 {% endblock %}

@@ -1,5 +1,14 @@
-<form method="post" action="{{ path('commande_delete', {'id': commande.id}) }}">
+{# Variables optionnelles : retour (URL où revenir), libelle (texte du bouton) #}
+<form method="post" action="{{ path('commande_delete', {'id': commande.id}) }}" class="d-inline"
+      onsubmit="return confirm('Annuler la commande de {{ (commande.prenom ~ ' ' ~ commande.nom)|e('js') }} ?')">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commande.id) }}">
-    <button class="btn" onclick="return confirm('Voulez-vous vraiment supprimer cette commande ?')"><i class="fas fa-trash-alt"></i></button>
+    {% if retour is defined and retour %}
+        <input type="hidden" name="_retour" value="{{ retour }}">
+    {% endif %}
+    {% if libelle is defined %}
+        <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt" aria-hidden="true"></i> {{ libelle }}</button>
+    {% else %}
+        <button class="btn btn-link text-danger p-0" aria-label="Supprimer la commande de {{ commande.prenom }} {{ commande.nom }}" title="Supprimer"><i class="fas fa-trash-alt" aria-hidden="true"></i></button>
+    {% endif %}
 </form>
