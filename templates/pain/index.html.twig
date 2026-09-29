@@ -22,7 +22,7 @@
             </div>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-lien mb-0">
+            <table class="table table-hover table-lien tableau-cartes mb-0" id="tableau-pains" data-tableau data-nom="pain">
                 <thead>
                     <tr>
                         <th scope="col">Nom</th>
@@ -35,11 +35,11 @@
                 <tbody>
                 {% for pain in pains %}
                     <tr class="{{ pain.actif ? '' : 'text-muted' }}" onclick="location.href='{{ path('pain_edit', {'id': pain.id}) }}'">
-                        <td><a class="lien-ligne" href="{{ path('pain_edit', {'id': pain.id}) }}">{{ pain.nom }}</a></td>
-                        <td class="text-right text-nowrap">{{ pain.poid|kg }}</td>
-                        <td class="text-right text-nowrap">{{ pain.prix|euros }}</td>
-                        <td class="text-right text-nowrap">{{ pain.poid > 0 ? (pain.prix / pain.poid)|euros : '—' }}</td>
-                        <td>{% if pain.actif %}<span class="badge badge-success">En vente</span>{% else %}<span class="badge badge-secondary">Archivé</span>{% endif %}</td>
+                        <td data-order="{{ pain.nom|lower }}"><a class="lien-ligne" href="{{ path('pain_edit', {'id': pain.id}) }}">{{ pain.nom }}</a></td>
+                        <td class="text-right text-nowrap" data-order="{{ pain.poid }}">{{ pain.poid|kg }}</td>
+                        <td class="text-right text-nowrap" data-order="{{ pain.prix }}">{{ pain.prix|euros }}</td>
+                        <td class="text-right text-nowrap" data-order="{{ pain.poid > 0 ? pain.prix / pain.poid : 0 }}">{{ pain.poid > 0 ? (pain.prix / pain.poid)|euros : '—' }}</td>
+                        <td data-order="{{ pain.actif ? 0 : 1 }}">{% if pain.actif %}<span class="badge badge-success">En vente</span>{% else %}<span class="badge badge-secondary">Archivé</span>{% endif %}</td>
                     </tr>
                 {% else %}
                     <tr>

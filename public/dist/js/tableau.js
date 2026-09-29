@@ -1,19 +1,24 @@
 /*
  * Tableaux interactifs (remplace DataTables) : recherche, tri, pagination.
- * Aucune dépendance. S'active sur toute table portant l'attribut data-tableau.
+ * Aucune dépendance.
+ *
+ * Classe tableau-cartes : sur petit écran, chaque ligne devient une carte
+ * (les libellés des colonnes sont recopiés dans data-label, voir style.css).
+ * Attribut data-tableau : ajoute la recherche, le tri et la pagination.
  *
  * Attributs de la table :
  *   data-tableau                 active le composant
  *   data-par-page="25"           taille de page (0 ou absent : pas de pagination)
  *   data-tri="0" / "0:desc"      colonne triée au chargement
- *   data-recherche="false"       masque le champ de recherche
+ *   data-recherche="true|false"  force l'affichage du champ de recherche
+ *                                (par défaut : affiché au-delà de 5 lignes)
  *   data-nom="commande"          libellé des éléments (« 12 commandes »)
  * Attributs des cellules :
  *   th[data-tri="false"]         colonne non triable
  *   td[data-order]               valeur utilisée pour le tri (sinon le texte)
+ *   td[data-label=""]            cellule sans libellé en mode carte (actions)
  *
- * Sur petit écran, chaque ligne devient une carte : les libellés des colonnes
- * sont recopiés dans data-label pour être affichés en CSS (voir style.css).
+ * Une ligne d'une seule cellule fusionnée (« Aucun élément… ») est ignorée.
  */
 (function () {
     'use strict';
@@ -37,6 +42,28 @@
         return comparateur.compare(a, b);
     }
 
+    function estVide(ligne) {
+        return ligne.cells.length === 1 && ligne.cells[0].colSpan > 1;
+    }
+
+    // Recopie le libellé de chaque colonne sur ses cellules (corps et pied)
+    function etiqueter(table) {
+        if (!table.tHead || !table.tHead.rows.length) return;
+        var libelles = Array.prototype.map.call(table.tHead.rows[0].cells, function (th) {
+            return th.textContent.trim();
+        });
+        var lignes = Array.prototype.slice.call(table.tBodies).reduce(function (tout, corps) {
+            return tout.concat(Array.prototype.slice.call(corps.rows));
+        }, []);
+        if (table.tFoot) lignes = lignes.concat(Array.prototype.slice.call(table.tFoot.rows));
+        lignes.forEach(function (ligne) {
+            if (estVide(ligne)) return;
+            Array.prototype.forEach.call(ligne.cells, function (td, i) {
+                if (libelles[i] && !td.hasAttribute('data-label')) td.setAttribute('data-label', libelles[i]);
+            });
+        });
+    }
+
     function pluriel(n, nom) {
         return n + ' ' + nom + (n > 1 ? 's' : '');
     }
@@ -45,7 +72,9 @@
         this.table = table;
         this.corps = table.tBodies[0];
         this.entetes = Array.prototype.slice.call(table.tHead.rows[0].cells);
-        this.lignes = Array.prototype.slice.call(this.corps.rows);
+        this.lignes = Array.prototype.slice.call(this.corps.rows).filter(function (ligne) {
+            return !estVide(ligne);
+        });
         this.parPage = parseInt(table.getAttribute('data-par-page'), 10) || 0;
         this.nom = table.getAttribute('data-nom') || 'ligne';
         this.page = 0;
@@ -57,7 +86,6 @@
             ligne._texte = normaliser(ligne.textContent);
         });
 
-        this.etiqueterCellules();
         this.construireBarre();
         this.construireTri();
 
@@ -70,21 +98,13 @@
         }
     }
 
-    Tableau.prototype.etiqueterCellules = function () {
-        var libelles = this.entetes.map(function (th) { return th.textContent.trim(); });
-        this.lignes.forEach(function (ligne) {
-            Array.prototype.forEach.call(ligne.cells, function (td, i) {
-                if (libelles[i] && !td.hasAttribute('data-label')) td.setAttribute('data-label', libelles[i]);
-            });
-        });
-    };
-
     Tableau.prototype.construireBarre = function () {
         var self = this;
         var barre = this.barre = document.createElement('div');
         barre.className = 'tableau-barre';
 
-        if (this.table.getAttribute('data-recherche') !== 'false') {
+        var recherche = this.table.getAttribute('data-recherche');
+        if (recherche === null ? this.lignes.length > 5 : recherche !== 'false') {
             var id = (this.table.id || 'tableau') + '-recherche';
             barre.innerHTML =
                 '<label class="sr-only" for="' + id + '">Rechercher</label>' +
@@ -210,8 +230,14 @@
     };
 
     function initialiser() {
-        document.querySelectorAll('table[data-tableau]').forEach(function (table) {
-            if (!table._tableau && table.tHead && table.tBodies.length) table._tableau = new Tableau(table);
+        document.querySelectorAll('table.tableau-cartes, table[data-tableau]').forEach(function (table) {
+            if (table._tableau) return;
+            etiqueter(table);
+            table._tableau = true;
+            if (!table.hasAttribute('data-tableau') || !table.tHead || !table.tBodies.length) return;
+            // Tableau vide (ligne « Aucun… ») : rien à trier ni à rechercher
+            var pleines = Array.prototype.filter.call(table.tBodies[0].rows, function (ligne) { return !estVide(ligne); });
+            if (pleines.length) table._tableau = new Tableau(table);
         });
     }
 

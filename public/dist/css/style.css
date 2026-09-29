@@ -189,30 +189,38 @@ th[aria-sort="ascending"] .tableau-tri::after { content: "\f0de"; opacity: .8; }
 th[aria-sort="descending"] .tableau-tri::after { content: "\f0dd"; opacity: .8; }
 .tableau-tri:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
-/* Petit écran : chaque ligne devient une carte, libellé à gauche, valeur à droite */
-@media (max-width: 767.98px) {
+/* Petit écran : chaque ligne devient une carte, libellé à gauche, valeur à droite.
+   Limité à l'écran : à l'impression, les tableaux restent des tableaux. */
+@media screen and (max-width: 767.98px) {
     table.tableau-cartes thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-    table.tableau-cartes, table.tableau-cartes tbody, table.tableau-cartes tr, table.tableau-cartes td { display: block; width: 100%; }
+    table.tableau-cartes, table.tableau-cartes tbody, table.tableau-cartes tfoot,
+    table.tableau-cartes tr, table.tableau-cartes td { display: block; width: 100% !important; }
     table.tableau-cartes tr[hidden] { display: none; }
-    table.tableau-cartes tbody tr {
-        border-top: 1px solid #dee2e6; padding: .5rem 1rem;
-    }
+    table.tableau-cartes.text-nowrap td { white-space: normal; }
+    table.tableau-cartes tbody tr,
+    table.tableau-cartes tfoot tr { border-top: 1px solid #dee2e6; padding: .5rem 1rem; }
     table.tableau-cartes.table-striped tbody tr:nth-of-type(odd) { background-color: rgba(0,0,0,.03); }
-    table.tableau-cartes tbody td {
+    table.tableau-cartes tfoot tr { background-color: #f4f6f9; }
+    table.tableau-cartes td {
         display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
         border: 0; padding: .2rem 0 !important; text-align: right !important;
     }
-    table.tableau-cartes tbody td::before {
+    table.tableau-cartes td > * { min-width: 0; }
+    table.tableau-cartes td::before {
         content: attr(data-label); flex-shrink: 0;
         font-weight: 600; color: #6c757d; text-align: left;
     }
-    table.tableau-cartes tbody td[data-label=""]::before { content: none; }
-    table.tableau-cartes tbody td[data-label=""] { justify-content: flex-end; }
+    /* Cellule sans libellé (actions) : boutons alignés à droite, sur plusieurs lignes au besoin */
+    table.tableau-cartes td[data-label=""] { justify-content: flex-end; flex-wrap: wrap; gap: .35rem; padding-top: .4rem !important; }
+    table.tableau-cartes td[data-label=""]::before,
+    table.tableau-cartes td:not([data-label])::before { content: none; }
     /* La première cellule sert de titre de carte */
-    table.tableau-cartes tbody td:first-child { display: block; text-align: left !important; font-size: 1.05rem; }
-    table.tableau-cartes tbody td:first-child::before { content: none; }
+    table.tableau-cartes td:first-child { display: block; text-align: left !important; font-size: 1.05rem; }
+    table.tableau-cartes td:first-child::before { content: none; }
 }
 @media print {
     .tableau-barre, .tableau-pagination, .tableau-tri::after { display: none !important; }
     table[data-tableau] tbody tr[hidden] { display: table-row !important; }
 }
+
+.remplissage { min-width: 8rem; }
