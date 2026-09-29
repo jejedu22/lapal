@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover tableau-cartes mb-0" id="tableau-jours" data-tableau data-par-page="25" data-nom="jour">
                 <thead>
                     <tr>
                         <th scope="col">Date</th>
@@ -39,27 +39,29 @@
                         <th scope="col" style="min-width: 11rem">Remplissage</th>
                         <th scope="col">Commandes</th>
                         <th scope="col">État</th>
-                        <th scope="col" class="text-right">Actions</th>
+                        <th scope="col" class="text-right" data-tri="false">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for jour in jour_distribs %}
                     {% set statut = jour.statut %}
                     <tr class="{{ statut == 'passe' ? 'text-muted' }}">
-                        <td class="text-nowrap">
+                        <td class="text-nowrap" data-order="{{ jour.date|date('Y-m-d') }}">
                             <a href="{{ path('jour_distrib_edit', {'id': jour.id}) }}">{{ jour.date|format_datetime('full', 'none', locale='fr')|capitalize }}</a>
                             {% if jour.commentaire %}<br><small class="text-muted">{{ jour.commentaire }}</small>{% endif %}
                         </td>
                         <td>{{ jour.boulanger ? jour.boulanger.prenom ~ ' ' ~ jour.boulanger.nom : '—' }}</td>
-                        <td>
-                            <div class="small">{{ jour.poidsCommande|kg }} / {{ jour.total|kg }}</div>
-                            <div class="progress progress-xs" aria-hidden="true">
-                                <div class="progress-bar {{ jour.tauxRemplissage >= 100 ? 'bg-warning' : 'bg-success' }}" style="width: {{ jour.tauxRemplissage }}%"></div>
+                        <td data-order="{{ jour.tauxRemplissage }}">
+                            <div class="remplissage">
+                                <div class="small">{{ jour.poidsCommande|kg }} / {{ jour.total|kg }}</div>
+                                <div class="progress progress-xs" aria-hidden="true">
+                                    <div class="progress-bar {{ jour.tauxRemplissage >= 100 ? 'bg-warning' : 'bg-success' }}" style="width: {{ jour.tauxRemplissage }}%"></div>
+                                </div>
                             </div>
                         </td>
                         <td>{{ jour.commandes|length }}</td>
                         <td><span class="badge badge-{{ statuts[statut][1] }}">{{ statuts[statut][0] }}</span></td>
-                        <td class="text-right text-nowrap">
+                        <td class="text-right text-nowrap" data-label="">
                             {% if statut != 'passe' %}
                                 <form method="post" action="{{ path('jour_distrib_fermeture', {'id': jour.id}) }}" class="d-inline">
                                     <input type="hidden" name="_token" value="{{ csrf_token('fermeture' ~ jour.id) }}">
