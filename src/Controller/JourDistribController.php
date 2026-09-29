@@ -133,7 +133,7 @@ class JourDistribController extends AbstractController
             fwrite($sortie, "\xEF\xBB\xBF");
             fputcsv($sortie, ['Nom', 'Prénom', 'Pain', 'Poids unitaire (kg)', 'Quantité', 'Prix unitaire (€)', 'Montant (€)', 'Livrée', 'Commentaire'], ';');
             foreach ($commandes as $commande) {
-                foreach ($commande->getLigneCommandes() as $ligne) {
+                foreach ($commande->getLignesTriees() as $ligne) {
                     $pain = $ligne->getPain();
                     fputcsv($sortie, [
                         $commande->getNom(),

@@ -45,7 +45,7 @@
                 <tbody>
                 {% set total = 0 %}
                 {% set poids = 0 %}
-                {% for ligne in commande.ligneCommandes %}
+                {% for ligne in commande.lignesTriees %}
                     {% set somme = ligne.quantite * ligne.pain.prix %}
                     {% set total = total + somme %}
                     {% set poids = poids + ligne.quantite * ligne.pain.poid %}

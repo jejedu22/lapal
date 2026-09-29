@@ -50,6 +50,13 @@ class Pain
      */
     private $actif = true;
 
+    /**
+     * Rang d'affichage, choisi dans l'administration (le plus petit en premier).
+     *
+     * @ORM\Column(type="integer", options={"default": 0})
+     */
+    private $position = 0;
+
     public function __construct()
     {
         $this->ligneCommandes = new ArrayCollection();
@@ -166,6 +173,26 @@ class Pain
         $this->actif = $actif;
 
         return $this;
+    }
+
+    public function getPosition(): int
+    {
+        return (int) $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    /**
+     * Ordre d'affichage des pains : rang choisi, puis nom.
+     */
+    public static function comparer(Pain $a, Pain $b): int
+    {
+        return [$a->getPosition(), mb_strtolower($a->getNom())] <=> [$b->getPosition(), mb_strtolower($b->getNom())];
     }
 
     public function getLibelle(): string

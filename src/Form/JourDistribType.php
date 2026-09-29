@@ -34,7 +34,7 @@ class JourDistribType extends AbstractType
             'multiple' => true,
             'expanded' => true,
             'query_builder' => function (EntityRepository $er) use ($options) {
-                $qb = $er->createQueryBuilder('p')->orderBy('p.nom', 'ASC');
+                $qb = $er->createQueryBuilder('p')->orderBy('p.position', 'ASC')->addOrderBy('p.nom', 'ASC');
                 // un nouveau jour ne propose que les pains actifs ;
                 // en modification on garde aussi les pains archivés déjà cochés
                 if (!$options['edit']) {

@@ -25,6 +25,7 @@ class JourDistrib
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\Pain", inversedBy="jourDistribs")
+     * @ORM\OrderBy({"position" = "ASC", "nom" = "ASC"})
      */
     private $pains;
 
