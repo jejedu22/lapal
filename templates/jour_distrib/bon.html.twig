@@ -54,7 +54,7 @@
                             {% if commande.commentaire %}<br><small><i>{{ commande.commentaire }}</i></small>{% endif %}
                         </td>
                         <td>
-                            {% for ligne in commande.ligneCommandes %}
+                            {% for ligne in commande.lignesTriees %}
                                 {% set total = total + ligne.quantite * ligne.pain.prix %}
                                 {{ ligne.quantite }} × {{ ligne.pain.nom }} {{ ligne.pain.poid|kg }}{{ not loop.last ? ', ' }}
                             {% endfor %}

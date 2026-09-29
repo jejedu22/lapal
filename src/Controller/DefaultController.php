@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Commande;
 use App\Entity\JourDistrib;
 use App\Entity\LigneCommande;
+use App\Entity\Pain;
 use App\Form\CommandeType;
 use App\Repository\CommandeRepository;
 use App\Repository\JourDistribRepository;
@@ -215,10 +216,7 @@ class DefaultController extends AbstractController
         foreach ($commande->getLigneCommandes() as $ligne) {
             $pains[$ligne->getPain()->getId()] = $ligne->getPain();
         }
-        $collator = class_exists(\Collator::class) ? new \Collator('fr_FR') : null;
-        uasort($pains, function ($a, $b) use ($collator) {
-            return $collator ? $collator->compare($a->getNom(), $b->getNom()) : strcasecmp($a->getNom(), $b->getNom());
-        });
+        uasort($pains, [Pain::class, 'comparer']);
 
         // Poids que cette commande peut atteindre
         $disponible = round($jourDistrib->getPoidsDisponible() + $poidsActuel, 3);

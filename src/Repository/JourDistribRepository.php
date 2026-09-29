@@ -127,8 +127,8 @@ class JourDistribRepository extends ServiceEntityRepository
             INNER JOIN lc.commande c
             INNER JOIN lc.pain p
             WHERE c.jourDistrib IN (:jours)
-            GROUP BY c.jourDistrib, p.id, p.nom, p.poid, p.prix
-            ORDER BY p.nom ASC'
+            GROUP BY c.jourDistrib, p.id, p.nom, p.poid, p.prix, p.position
+            ORDER BY p.position ASC, p.nom ASC'
         )
         ->setParameter('jours', $jourIds)
         ->getArrayResult();

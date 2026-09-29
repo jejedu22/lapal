@@ -64,7 +64,7 @@
                             </td>
                             <td>
                                 <div>
-                                {% for ligne in commande.ligneCommandes %}
+                                {% for ligne in commande.lignesTriees %}
                                     {% set total = total + ligne.quantite * ligne.pain.prix %}
                                     <div>{{ ligne.quantite }} × {{ ligne.pain.nom }} <span class="text-muted">{{ ligne.pain.poid|kg }}</span></div>
                                 {% endfor %}

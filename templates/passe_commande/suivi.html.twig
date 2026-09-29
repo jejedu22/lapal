@@ -58,7 +58,7 @@
                         <label for="livree-{{ commande.id }}" class="flex-fill mb-0 font-weight-normal">
                             <span class="suivi-nom font-weight-bold">{{ commande.nom|upper }} {{ commande.prenom }}</span>
                             <span class="suivi-detail d-block">
-                                {% for ligne in commande.ligneCommandes %}
+                                {% for ligne in commande.lignesTriees %}
                                     {% set total = total + ligne.quantite * ligne.pain.prix %}
                                     {{ ligne.quantite }} × {{ ligne.pain.nom }} {{ ligne.pain.poid|kg }}{{ not loop.last ? ' · ' }}
                                 {% endfor %}

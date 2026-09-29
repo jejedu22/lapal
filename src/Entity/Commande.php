@@ -90,6 +90,21 @@ class Commande
         return $this->ligneCommandes;
     }
 
+    /**
+     * Lignes dans l'ordre d'affichage des pains (choisi dans l'administration).
+     *
+     * @return LigneCommande[]
+     */
+    public function getLignesTriees(): array
+    {
+        $lignes = $this->ligneCommandes->toArray();
+        usort($lignes, function (LigneCommande $a, LigneCommande $b) {
+            return Pain::comparer($a->getPain(), $b->getPain());
+        });
+
+        return $lignes;
+    }
+
     public function addLigneCommande(LigneCommande $ligneCommande): self
     {
         if (!$this->ligneCommandes->contains($ligneCommande)) {

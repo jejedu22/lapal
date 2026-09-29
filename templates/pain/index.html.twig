@@ -21,8 +21,15 @@
                 <a href="{{ path('pain_new') }}" class="btn btn-success btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter un pain</a>
             </div>
         </div>
+        <div class="card-body border-bottom py-2 small text-muted">
+            <i class="fas fa-sort" aria-hidden="true"></i>
+            L’ordre ci-dessous est celui des pains dans le formulaire de commande. Utilisez les flèches ou faites glisser
+            <i class="fas fa-grip-vertical" aria-hidden="true"></i> pour le modifier : c’est enregistré aussitôt.
+            <span id="ordre-etat" class="ml-1" role="status" aria-live="polite"></span>
+        </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-lien tableau-cartes mb-0" id="tableau-pains" data-tableau data-nom="pain">
+            <table class="table table-hover table-lien tableau-cartes mb-0" id="tableau-pains"
+                   data-ordre-url="{{ path('pain_ordre') }}" data-ordre-jeton="{{ csrf_token('ordre-pains') }}">
                 <thead>
                     <tr>
                         <th scope="col">Nom</th>
@@ -30,20 +37,27 @@
                         <th scope="col" class="text-right">Prix</th>
                         <th scope="col" class="text-right">Prix au kg</th>
                         <th scope="col">État</th>
+                        <th scope="col" class="text-right">Ordre</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for pain in pains %}
-                    <tr class="{{ pain.actif ? '' : 'text-muted' }}" onclick="location.href='{{ path('pain_edit', {'id': pain.id}) }}'">
-                        <td data-order="{{ pain.nom|lower }}"><a class="lien-ligne" href="{{ path('pain_edit', {'id': pain.id}) }}">{{ pain.nom }}</a></td>
-                        <td class="text-right text-nowrap" data-order="{{ pain.poid }}">{{ pain.poid|kg }}</td>
-                        <td class="text-right text-nowrap" data-order="{{ pain.prix }}">{{ pain.prix|euros }}</td>
-                        <td class="text-right text-nowrap" data-order="{{ pain.poid > 0 ? pain.prix / pain.poid : 0 }}">{{ pain.poid > 0 ? (pain.prix / pain.poid)|euros : '—' }}</td>
-                        <td data-order="{{ pain.actif ? 0 : 1 }}">{% if pain.actif %}<span class="badge badge-success">En vente</span>{% else %}<span class="badge badge-secondary">Archivé</span>{% endif %}</td>
+                    <tr class="{{ pain.actif ? '' : 'text-muted' }}" data-id="{{ pain.id }}" data-groupe="{{ pain.actif ? 'actif' : 'archive' }}"
+                        onclick="location.href='{{ path('pain_edit', {'id': pain.id}) }}'">
+                        <td><a class="lien-ligne" href="{{ path('pain_edit', {'id': pain.id}) }}">{{ pain.nom }}</a></td>
+                        <td class="text-right text-nowrap">{{ pain.poid|kg }}</td>
+                        <td class="text-right text-nowrap">{{ pain.prix|euros }}</td>
+                        <td class="text-right text-nowrap">{{ pain.poid > 0 ? (pain.prix / pain.poid)|euros : '—' }}</td>
+                        <td>{% if pain.actif %}<span class="badge badge-success">En vente</span>{% else %}<span class="badge badge-secondary">Archivé</span>{% endif %}</td>
+                        <td class="text-right text-nowrap ordre-pain" data-label="" onclick="event.stopPropagation()">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-sens="-1" aria-label="Monter {{ pain.nom }}" title="Monter"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-sens="1" aria-label="Descendre {{ pain.nom }}" title="Descendre"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
+                            <span class="ordre-poignee d-none d-md-inline-block" draggable="true" title="Faire glisser" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
+                        </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-muted">Aucun pain pour l’instant. <a href="{{ path('pain_new') }}">Ajouter le premier</a></td>
+                        <td colspan="6" class="text-muted">Aucun pain pour l’instant. <a href="{{ path('pain_new') }}">Ajouter le premier</a></td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -51,4 +65,101 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    'use strict';
+    var table = document.getElementById('tableau-pains');
+    var corps = table.tBodies[0];
+    var etat = document.getElementById('ordre-etat');
+    var envoi = null;
+
+    function lignes() {
+        return Array.prototype.slice.call(corps.querySelectorAll('tr[data-id]'));
+    }
+
+    // Les pains en vente restent avant les pains archivés : on ne déplace qu'au sein d'un même groupe
+    function voisine(ligne, sens) {
+        var v = sens < 0 ? ligne.previousElementSibling : ligne.nextElementSibling;
+        return v && v.getAttribute('data-groupe') === ligne.getAttribute('data-groupe') ? v : null;
+    }
+
+    function actualiserBoutons() {
+        lignes().forEach(function (ligne) {
+            ligne.querySelector('[data-sens="-1"]').disabled = !voisine(ligne, -1);
+            ligne.querySelector('[data-sens="1"]').disabled = !voisine(ligne, 1);
+        });
+    }
+
+    function enregistrer() {
+        actualiserBoutons();
+        etat.className = 'ml-1 text-muted';
+        etat.textContent = 'Enregistrement…';
+        var donnees = new FormData();
+        donnees.append('_token', table.getAttribute('data-ordre-jeton'));
+        lignes().forEach(function (ligne) { donnees.append('ordre[]', ligne.getAttribute('data-id')); });
+        var courant = envoi = fetch(table.getAttribute('data-ordre-url'), {
+            method: 'POST', body: donnees, credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        }).then(function (reponse) {
+            if (!reponse.ok) throw new Error();
+            if (courant !== envoi) return;
+            etat.className = 'ml-1 text-success';
+            etat.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Ordre enregistré';
+        }).catch(function () {
+            if (courant !== envoi) return;
+            etat.className = 'ml-1 text-danger';
+            etat.textContent = 'L’ordre n’a pas pu être enregistré. Rechargez la page et réessayez.';
+        });
+    }
+
+    corps.addEventListener('click', function (e) {
+        var bouton = e.target.closest('button[data-sens]');
+        if (!bouton) return;
+        var ligne = bouton.closest('tr');
+        var sens = parseInt(bouton.getAttribute('data-sens'), 10);
+        var cible = voisine(ligne, sens);
+        if (!cible) return;
+        corps.insertBefore(ligne, sens < 0 ? cible : cible.nextElementSibling);
+        enregistrer();
+        // Garde le focus sur la flèche, ou sur l'autre si celle-ci devient inactive
+        (bouton.disabled ? ligne.querySelector('[data-sens="' + -sens + '"]') : bouton).focus();
+    }, true); // capture : la cellule arrête la propagation pour ne pas ouvrir la fiche du pain
+
+    // Glisser-déposer (souris) par la poignée
+    var deplacee = null, ordreAvant = '';
+
+    function ordreActuel() {
+        return lignes().map(function (ligne) { return ligne.getAttribute('data-id'); }).join(',');
+    }
+    corps.addEventListener('dragstart', function (e) {
+        if (!e.target.closest || !e.target.closest('.ordre-poignee')) return;
+        deplacee = e.target.closest('tr');
+        ordreAvant = ordreActuel();
+        deplacee.classList.add('ordre-deplacee');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', deplacee.getAttribute('data-id'));
+        e.dataTransfer.setDragImage(deplacee, 20, 20);
+    });
+    corps.addEventListener('dragover', function (e) {
+        if (!deplacee) return;
+        var cible = e.target.closest('tr[data-id]');
+        if (!cible || cible === deplacee || cible.getAttribute('data-groupe') !== deplacee.getAttribute('data-groupe')) return;
+        e.preventDefault();
+        var rect = cible.getBoundingClientRect();
+        corps.insertBefore(deplacee, e.clientY > rect.top + rect.height / 2 ? cible.nextElementSibling : cible);
+    });
+    corps.addEventListener('drop', function (e) { if (deplacee) e.preventDefault(); });
+    corps.addEventListener('dragend', function () {
+        if (!deplacee) return;
+        deplacee.classList.remove('ordre-deplacee');
+        deplacee = null;
+        if (ordreActuel() !== ordreAvant) enregistrer();
+    });
+
+    actualiserBoutons();
+})();
+</script>
 {% endblock %}
