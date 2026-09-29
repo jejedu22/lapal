@@ -1,21 +1,35 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Settings{% endblock %}
+{% set libelles = {
+    'color': 'Couleur du thème',
+    'logo': 'Logo de l’application',
+    'name': 'Nom de l’application',
+    'welcome_text': 'Message d’accueil',
+    'contact_email': 'E-mail de contact',
+} %}
+
+{% block title %}{{ libelles[setting.name] ?? setting.name }}{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">{{ libelles[setting.name] ?? setting.name }}</h1>
+{% endblock %}
 
 {% block body %}
-
-    <div class="col-md-12">
+    <div class="col-12 col-lg-8 col-xl-6">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Modifier {{ setting.name |trans}}</h3>          
-            </div>
-            <!-- /.card-header -->
             <div class="card-body">
-
-                {{ include('settings/_form.html.twig', {'button_label': 'Valider'}) }}
-                <a href="{{ path('settings_index') }}"><i class="fas fa-angle-double-left"></i></a>
+                {{ include('settings/_form.html.twig', {'button_label': 'Enregistrer'}) }}
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block javascripts %}
+<script>
+// affiche le nom du fichier choisi dans le champ d'upload du logo
+$(document).on('change', '.custom-file-input', function () {
+    var nom = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
+    $(this).parent('.custom-file').find('.custom-file-label').text(nom);
+});
+</script>
 {% endblock %}

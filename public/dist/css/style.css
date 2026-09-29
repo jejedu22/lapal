@@ -150,3 +150,15 @@
 }
 .card-body.p-0 .table tfoot > tr > td:first-of-type { padding-left: 1.5rem; }
 .card-body.p-0 .table tfoot > tr > td:last-of-type { padding-right: 1.5rem; }
+
+/* Nuancier de la configuration */
+.nuancier { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.25rem; }
+.nuancier__radio { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.nuancier__pastille {
+    display: block; width: 3rem; height: 3rem; margin: 0;
+    border-radius: 50%; cursor: pointer; border: 3px solid transparent;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.15);
+}
+.nuancier__radio:checked + .nuancier__pastille { border-color: #fff; box-shadow: 0 0 0 3px #343a40; }
+.nuancier__radio:focus-visible + .nuancier__pastille { outline: 2px dashed #343a40; outline-offset: 3px; }
+.nuancier__apercu { display: inline-block; width: 4rem; height: 1rem; border-radius: .25rem; margin-top: .25rem; }

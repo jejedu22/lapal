@@ -1,38 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Paramètres{% endblock %}
+{% block title %}Configuration{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Configuration</h1>
+{% endblock %}
+
+{% set libelles = {
+    'color': ['Couleur du thème', 'fas fa-palette'],
+    'logo': ['Logo de l’application', 'far fa-image'],
+    'name': ['Nom de l’application', 'fas fa-signature'],
+    'welcome_text': ['Message d’accueil', 'far fa-comment-dots'],
+    'contact_email': ['E-mail de contact', 'far fa-envelope'],
+} %}
 
 {% block body %}
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Paramètres</h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0">
-
-                <table  class="table table-hover text-nowrap">
-                    <tbody>
-                    {% for setting in settings %}
-                        <tr onclick="document.location = '{{ path('settings_edit', {'id': setting.id}) }}';">
-                            <td>{{ setting.name |trans}}</td>
-                                {% if setting.name == 'color'%}
-                                <td><div class="option-index-color color-{{setting.value}}"></div></td>
-                                {% elseif setting.name == 'logo'%}
-                                <td><img src='{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}' alt="logo" class="brand-image img-circle elevation-3 navbar-{{ options_settings.get('color') }}" style="opacity: .8; max-height: 50px;"></td>
-
-                                {% else %}
-                                <td>{{ setting.value }}</td>
-                                {% endif %}
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4">no records found</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>                
+<div class="col-12 col-lg-8 col-xl-6">
+    <div class="card">
+        <ul class="list-group list-group-flush">
+            {% for setting in settings %}
+                {% set libelle = libelles[setting.name] ?? [setting.name, 'fas fa-cog'] %}
+                <li class="list-group-item">
+                    <a href="{{ path('settings_edit', {'id': setting.id}) }}" class="d-flex align-items-center text-reset">
+                        <i class="{{ libelle[1] }} text-muted mr-3" style="width: 1.2rem" aria-hidden="true"></i>
+                        <span class="flex-fill">
+                            <span class="d-block font-weight-bold">{{ libelle[0] }}</span>
+                            {% if setting.name == 'color' %}
+                                <span class="nuancier__apercu color-{{ setting.value }}" aria-hidden="true"></span>
+                            {% elseif setting.name == 'logo' %}
+                                {% if setting.value %}<img src="{{ asset('uploads/logo/' ~ setting.value) }}" alt="Logo actuel" class="img-circle elevation-1 mt-1" style="max-height: 40px">{% endif %}
+                            {% elseif setting.name == 'welcome_text' %}
+                                <span class="text-muted">{{ setting.value|striptags }}</span>
+                            {% else %}
+                                <span class="text-muted">{{ setting.value ?: '—' }}</span>
+                            {% endif %}
+                        </span>
+                        <i class="fas fa-chevron-right text-muted" aria-hidden="true"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">Aucun paramètre.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 {% endblock %}
