@@ -1,69 +1,38 @@
 {{ form_start(form) }}
-    {% if form.vars.data.id == 1 %}
-    <table class="colors-table">
-        <tr>
-            <td class="option-color color-blue">{{ form_row(form.value[0])}}</td>
-            <td class="option-color color-indigo">{{ form_row(form.value[4])}}</td>
-            <td class="option-color color-purple">{{ form_row(form.value[11])}}</td>
-            <td class="option-color color-pink">{{ form_row(form.value[7])}}</td>
-            <td class="option-color color-red">{{ form_row(form.value[8])}}</td>
-            <td class="option-color color-orange">{{ form_row(form.value[6])}}</td>
-            <td class="option-color color-yellow">{{ form_row(form.value[5])}}</td>
-            <td class="option-color color-green">{{ form_row(form.value[10])}}</td>
-            <td class="option-color color-teal">{{ form_row(form.value[9])}}</td>
-            <td class="option-color color-cyan">{{ form_row(form.value[1])}}</td>
-            <td class="option-color color-gray">{{ form_row(form.value[2])}}</td>
-            <td class="option-color color-gray-dark">{{ form_row(form.value[3])}}</td>
-        </tr>
-    </table>
-    {% elseif form.vars.data.id == 2 %}
-    <div class="text-center">
-        <img src='{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}' alt="logo" class="img-fluid img-circle brand-image img-circle elevation-3 navbar-{{ options_settings.get('color') }}" style="opacity: .8; max-height: 50px;">
-    </div>
-    {{ form_row(form.value, {
-        attr: {
-            'placeholder': 'Choisir une image PNG'
-        }
-    }) }}
+    {% if form.vars.data.name == 'color' %}
+        <fieldset>
+            <legend class="col-form-label">Choisissez la couleur de l’en-tête et du menu</legend>
+            <div class="nuancier">
+                {% for choix in form.value %}
+                    <div class="nuancier__choix">
+                        <input type="radio" class="nuancier__radio" id="{{ choix.vars.id }}" name="{{ choix.vars.full_name }}"
+                               value="{{ choix.vars.value }}"{{ choix.vars.checked ? ' checked' }}>
+                        <label for="{{ choix.vars.id }}" class="nuancier__pastille color-{{ choix.vars.value }}" title="{{ choix.vars.label }}">
+                            <span class="sr-only">{{ choix.vars.label }}</span>
+                        </label>
+                    </div>
+                    {% do choix.setRendered %}
+                {% endfor %}
+            </div>
+        </fieldset>
+        {% do form.value.setRendered %}
+    {% elseif form.vars.data.name == 'logo' %}
+        {% if options_settings.get('logo') %}
+            <div class="text-center mb-3">
+                <img src="{{ asset('uploads/logo/' ~ options_settings.get('logo')) }}" alt="Logo actuel"
+                     class="img-circle elevation-2 navbar-{{ options_settings.get('color') }}" style="max-height: 80px">
+            </div>
+        {% endif %}
+        {{ form_row(form.value, {
+            'label': 'Nouveau logo (PNG, 100 Ko maximum)',
+            'attr': {'placeholder': 'Choisir une image PNG', 'accept': 'image/png'}
+        }) }}
+    {% elseif form.vars.data.name == 'welcome_text' %}
+        {{ form_row(form.value, {'label': 'Texte affiché en haut de la page d’accueil', 'help': 'Le HTML simple est accepté, par exemple <b>gras</b>.'}) }}
     {% else %}
-    {{ form_widget(form.value) }}
+        {{ form_row(form.value, {'label': false}) }}
     {% endif %}
-    <button class="btn btn-success">{{ button_label|default('Save') }}</button>
-    
+    {{ form_rest(form) }}
+    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('settings_index') }}" class="btn btn-link">Annuler</a>
 {{ form_end(form) }}
-
-{% block javascripts %}
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-            
-    <script>
-    $(function () {
-        $('.option-color').click(
-            function () {
-                $(this).addClass('active').siblings().removeClass('active');
-                var $radioBtn = $('.option-color.active input[type="radio"]');
-
-                if ($radioBtn.is(':checked') === true) {
-                    $radioBtn.filter('input[type="radio"]').prop('checked', true);
-                }
-            }
-        );
-    });
-    </script>
-    <script>
-    $('.custom-file-input').on('change', function(event) {
-        var inputFile = event.currentTarget;
-        $(inputFile).parent()
-            .find('.custom-file-label')
-            .html(inputFile.files[0].name);
-    });
-
-    </script>
-    <script>
-    $(document).on('change', '.custom-file-input', function () {
-        let fileName = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
-        $(this).parent('.custom-file').find('.custom-file-label').text(fileName);
-    });
-    </script>
-{% endblock %}

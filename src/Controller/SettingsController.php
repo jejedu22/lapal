@@ -66,6 +66,7 @@ class SettingsController extends AbstractController
                 $setting->setValue($form->get('value')->getData());
             }
             $this->getDoctrine()->getManager()->flush();
+            $this->addFlash('success', 'Le paramètre a été mis à jour.');
 
             return $this->redirectToRoute('settings_index');
         }

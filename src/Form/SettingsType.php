@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Settings;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,7 +30,7 @@ class SettingsType extends AbstractType
             // checks if the Product object is "new"
             // If no data is passed to the form, the data is "null".
             // This should be considered a new "Product"
-            if (!$settings || 1 === $settings->getId()) {
+            if (!$settings || 'color' === $settings->getName()) {
                 $form->add('value', ChoiceType::class, [
                     'choices'  => [
                         'Bleu' => 'blue',
@@ -53,7 +54,7 @@ class SettingsType extends AbstractType
                     'placeholder' => false
                 ]);
             }
-            elseif (!$settings || 2 === $settings->getId()){
+            elseif ('logo' === $settings->getName()) {
                 $form->add('value', FileType::class, [
                     'mapped' => false,
                     'required' => false,
@@ -66,15 +67,22 @@ class SettingsType extends AbstractType
                             'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
                         ])
                     ],
-                    'label' => 'Coisir un Fichier',
+                    'label' => 'Choisir un fichier',
                 ]);
             }
-            elseif (!$settings || 5 === $settings->getId()){
+            elseif ('contact_email' === $settings->getName()) {
                 $form->add('value', EmailType::class, [
-                    'help' => 'Entrez une adresse Email',
+                    'help' => 'Adresse affichée via l’icône enveloppe en haut à droite.',
                     'mapped' => false,
+                    'data' => $settings->getValue(),
                     'required' => false,
             ]);
+            }
+            elseif ('welcome_text' === $settings->getName()) {
+                $form->add('value', TextareaType::class, [
+                    'required' => false,
+                    'attr' => ['rows' => 3],
+                ]);
             }
             else {
                 $form->add('value');

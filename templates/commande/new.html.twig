@@ -1,87 +1,136 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajouter une commande{% endblock %}
+{% block title %}{{ creation ? 'Commander' : 'Modifier ma commande' }}{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">{{ creation ? 'Ma commande' : 'Modifier ma commande' }}</h1>
+    <p class="text-muted mb-0">
+        {{ jour_distrib.date|format_datetime('full', 'none', locale='fr')|capitalize }}
+        {% if jour_distrib.boulanger %} · {{ jour_distrib.boulanger.prenom }} {{ jour_distrib.boulanger.nom }}{% endif %}
+        {% if jour_distrib.commentaire %} · {{ jour_distrib.commentaire }}{% endif %}
+    </p>
+{% endblock %}
 
 {% block body %}
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Ajouter une commande</h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-                {{ include('commande/_form.html.twig') }}
+<div class="col-12 col-lg-8 col-xl-6">
+    {{ form_start(form, {'attr': {'id': 'form-commande', 'novalidate': 'novalidate'}}) }}
 
-                <button type="button" class="btn btn-block btn-danger" onclick="window.location.href='{{ path('passe_commande_index') }}'">Annuler</button>
+    {% for erreur in form.vars.errors %}
+        <div class="alert alert-danger" role="alert"><i class="fas fa-exclamation-triangle" aria-hidden="true"></i> {{ erreur.message }}</div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">1. Vos pains</h2>
+        </div>
+        <ul class="list-group list-group-flush" id="liste-pains" data-disponible="{{ disponible }}">
+            {% for pain in pains %}
+                {% set q = quantites[pain.id] ?? 0 %}
+                <li class="list-group-item ligne-pain" data-poids="{{ pain.poid }}" data-prix="{{ pain.prix }}">
+                    <div class="d-flex align-items-center">
+                        <label for="quantite-{{ pain.id }}" class="flex-fill mb-0 font-weight-normal">
+                            <strong>{{ pain.nom }}</strong><br>
+                            <span class="text-muted small">{{ pain.poid|kg }} · {{ pain.prix|euros }}</span>
+                        </label>
+                        <div class="stepper" role="group" aria-label="Quantité de {{ pain.nom }}">
+                            <button type="button" class="btn btn-outline-secondary stepper__btn" data-pas="-1" aria-label="Un {{ pain.nom }} de moins">
+                                <i class="fas fa-minus" aria-hidden="true"></i>
+                            </button>
+                            <input type="number" inputmode="numeric" class="form-control stepper__valeur" id="quantite-{{ pain.id }}"
+                                   name="quantites[{{ pain.id }}]" value="{{ q }}" min="0" max="{{ quantite_max }}" step="1">
+                            <button type="button" class="btn btn-outline-secondary stepper__btn" data-pas="1" aria-label="Un {{ pain.nom }} de plus">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">Aucun pain n’est proposé pour ce jour.</li>
+            {% endfor %}
+        </ul>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <span>Total</span>
+                <strong><span id="total-prix">0,00 €</span> · <span id="total-poids">0 kg</span></strong>
+            </div>
+            <div class="small text-muted" id="info-dispo">Encore {{ disponible|kg }} disponibles pour ce jour.</div>
+            <div class="small text-danger font-weight-bold d-none" id="alerte-dispo" role="alert">
+                Votre commande dépasse ce qui reste ({{ disponible|kg }}). Retirez quelques pains.
             </div>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">2. Vos coordonnées</h2>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-sm-6">{{ form_row(form.prenom) }}</div>
+                <div class="col-sm-6">{{ form_row(form.nom) }}</div>
+            </div>
+            {% if form.commentaire.vars.value %}
+                {{ form_row(form.commentaire) }}
+            {% else %}
+                <a href="#bloc-commentaire" class="small" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="bloc-commentaire">
+                    <i class="far fa-comment" aria-hidden="true"></i> Ajouter un commentaire
+                </a>
+                <div class="collapse mt-2" id="bloc-commentaire">
+                    {{ form_row(form.commentaire) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {{ form_rest(form) }}
+
+    <button type="submit" class="btn btn-success btn-lg btn-block" id="bouton-valider">
+        <i class="fas fa-check" aria-hidden="true"></i> {{ creation ? 'Valider ma commande' : 'Enregistrer les modifications' }}
+    </button>
+    <div class="text-center my-3">
+        <a href="{{ creation ? path('passe_commande_index') : path('commande_index') }}" class="text-muted">Annuler</a>
+    </div>
+    {{ form_end(form) }}
+</div>
 {% endblock %}
 
 {% block javascripts %}
 <script>
-var $collectionHolder;
+(function () {
+    var liste = document.getElementById('liste-pains');
+    if (!liste) { return; }
+    var disponible = parseFloat(liste.dataset.disponible);
+    var formatPrix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+    var formatPoids = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
 
-// setup an "add a ligne" link
-var $addLigneButton = $('<button type="button" class="btn btn-block btn-info">Ajouter un pain</button>');
-var $newLinkLi = $('<li class="list-group-item"></li>').append($addLigneButton);
+    function recalculer() {
+        var prix = 0, poids = 0;
+        liste.querySelectorAll('.ligne-pain').forEach(function (ligne) {
+            var champ = ligne.querySelector('.stepper__valeur');
+            var q = Math.max(0, parseInt(champ.value, 10) || 0);
+            prix += q * parseFloat(ligne.dataset.prix);
+            poids += q * parseFloat(ligne.dataset.poids);
+            ligne.classList.toggle('ligne-pain--choisie', q > 0);
+        });
+        poids = Math.round(poids * 1000) / 1000;
+        document.getElementById('total-prix').textContent = formatPrix.format(prix);
+        document.getElementById('total-poids').textContent = formatPoids.format(poids) + ' kg';
+        var depasse = poids > disponible + 1e-9;
+        document.getElementById('alerte-dispo').classList.toggle('d-none', !depasse);
+        document.getElementById('info-dispo').classList.toggle('d-none', depasse);
+        document.getElementById('bouton-valider').disabled = depasse || poids === 0;
+    }
 
-jQuery(document).ready(function() {
-    // Get the ul that holds the collection of lignes
-    $collectionHolder = $('ul.ligneCommandes');
-
-    // add the "add a ligne" anchor and li to the lignes ul
-    $collectionHolder.append($newLinkLi);
-
-    // count the current form inputs we have (e.g. 2), use that as the new
-    // index when inserting a new item (e.g. 2)
-    $collectionHolder.data('index', $collectionHolder.find('input').length);
-
-    $addLigneButton.on('click', function(e) {
-        // add a new ligne form (see next code block)
-        addLigneCommandeForm($collectionHolder, $newLinkLi);
+    liste.addEventListener('click', function (e) {
+        var bouton = e.target.closest('.stepper__btn');
+        if (!bouton) { return; }
+        var champ = bouton.parentNode.querySelector('.stepper__valeur');
+        var valeur = (parseInt(champ.value, 10) || 0) + parseInt(bouton.dataset.pas, 10);
+        champ.value = Math.min(parseInt(champ.max, 10), Math.max(0, valeur));
+        recalculer();
     });
-});
-
-
-function addLigneCommandeForm($collectionHolder, $newLinkLi) {
-    // Get the data-prototype explained earlier
-    var prototype = $collectionHolder.data('prototype');
-
-    // get the new index
-    var index = $collectionHolder.data('index');
-
-    var newForm = prototype;
-    // You need this only if you didn't set 'label' => false in your lignes field in CommndeType
-    // Replace '__name__label__' in the prototype's HTML to
-    // instead be a number based on how many items we have
-    // newForm = newForm.replace(/__name__label__/g, index);
-
-    // Replace '__name__' in the prototype's HTML to
-    // instead be a number based on how many items we have
-    newForm = newForm.replace(/__name__/g, index);
-
-    // increase the index with one for the next item
-    $collectionHolder.data('index', index + 1);
-
-    // Display the form in the page in an li, before the "Add a ligne" link li
-    var $newFormLi = $('<li class="list-group-item"></li>').append(newForm);
-    $newLinkLi.before($newFormLi);
-    
-    $newFormLi.append('<a href="#" class="remove-tag"><button class="btn"><i class="fas fa-trash-alt"></i></button></a>');
-    
-    $newLinkLi.before($newFormLi);
-    
-    // handle the removal, just for this example
-    $('.remove-tag').click(function(e) {
-        e.preventDefault();
-        
-        $(this).parent().remove();
-        
-        return false;
-    });
-    
-}
+    liste.addEventListener('input', recalculer);
+    recalculer();
+})();
 </script>
-
 {% endblock %}

@@ -1,4 +1,13 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-block btn-success">{{ button_label|default('Enregistrer') }}</button>
+    <div class="form-row">
+        <div class="col-md-4">{{ form_row(form.date) }}</div>
+        <div class="col-md-4">{{ form_row(form.boulanger) }}</div>
+        <div class="col-md-4">{{ form_row(form.total) }}</div>
+    </div>
+    {{ form_row(form.commentaire) }}
+    {{ form_row(form.pains) }}
+    {{ form_row(form.closed) }}
+    {{ form_rest(form) }}
+    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('jour_distrib_index') }}" class="btn btn-link">Annuler</a>
 {{ form_end(form) }}

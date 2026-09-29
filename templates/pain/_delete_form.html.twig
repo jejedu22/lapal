@@ -1,5 +1,6 @@
-<form method="post" action="{{ path('pain_delete', {'id': pain.id}) }}">
+<form method="post" action="{{ path('pain_delete', {'id': pain.id}) }}" class="d-inline"
+      onsubmit="return confirm('Supprimer définitivement ce pain ?')">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ pain.id) }}">
-    <button class="btn" onclick="return confirm('Voulez-vous vraiment supprimer cette commande ?')"><i class="fas fa-trash-alt"></i></button>
+    <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt" aria-hidden="true"></i> Supprimer</button>
 </form>

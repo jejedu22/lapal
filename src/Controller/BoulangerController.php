@@ -38,6 +38,7 @@ class BoulangerController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($boulanger);
             $entityManager->flush();
+            $this->addFlash('success', 'Le boulanger a été ajouté.');
 
             return $this->redirectToRoute('boulanger_index');
         }
@@ -84,9 +85,15 @@ class BoulangerController extends AbstractController
     public function delete(Request $request, Boulanger $boulanger): Response
     {
         if ($this->isCsrfTokenValid('delete'.$boulanger->getId(), $request->request->get('_token'))) {
+            if (!$boulanger->getJourDistribs()->isEmpty()) {
+                $this->addFlash('warning', 'Ce boulanger est associé à des jours de distribution : il ne peut pas être supprimé.');
+
+                return $this->redirectToRoute('boulanger_edit', ['id' => $boulanger->getId()]);
+            }
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($boulanger);
             $entityManager->flush();
+            $this->addFlash('success', 'Le boulanger a été supprimé.');
         }
 
         return $this->redirectToRoute('boulanger_index');

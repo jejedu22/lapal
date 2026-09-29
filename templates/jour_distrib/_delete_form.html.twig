@@ -1,5 +1,6 @@
-<form method="post" action="{{ path('jour_distrib_delete', {'id': jour_distrib.id}) }}">
+<form method="post" action="{{ path('jour_distrib_delete', {'id': jour_distrib.id}) }}" class="d-inline"
+      onsubmit="return confirm('Supprimer ce jour de distribution et toutes ses commandes ?')">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ jour_distrib.id) }}">
-    <button class="btn"><i class="fas fa-trash-alt" onclick="return confirm('Voulez-vous vraiment supprimer cette commande ?')"></i></button>
+    <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt" aria-hidden="true"></i> Supprimer</button>
 </form>

@@ -12,8 +12,8 @@ class BoulangerType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('nom')
-            ->add('prenom')
+            ->add('prenom', null, ['label' => 'Prénom'])
+            ->add('nom', null, ['label' => 'Nom'])
         ;
     }
 

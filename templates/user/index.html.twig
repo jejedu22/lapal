@@ -1,42 +1,31 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Utilisateurs{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Utilisateurs</h1>
+    <p class="text-muted mb-0">Comptes de l’équipe ayant accès à l’administration.</p>
+{% endblock %}
 
 {% block body %}
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Liste des utilisateurs</h3>
-                <div class="card-tools">
-                    <a href="{{ path('app_register') }}" class="btn btn-tool btn-sm">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                </div>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0">
-
-                <table  class="table table-hover text-nowrap">
-                    <thead>
-                        <tr>
-                            <th>id</th>
-                            <th>Username</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for user in users %}
-                        <tr onclick="document.location = '{{ path('user_show', {'id': user.id}) }}';">
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="5">no records found</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+<div class="col-12 col-lg-8 col-xl-6">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ users|length }} compte{{ users|length > 1 ? 's' }}</h2>
+            <div class="card-tools">
+                <a href="{{ path('app_register') }}" class="btn btn-success btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter</a>
             </div>
         </div>
+        <ul class="list-group list-group-flush">
+            {% for user in users %}
+                <li class="list-group-item d-flex align-items-center">
+                    <a href="{{ path('user_show', {'id': user.id}) }}" class="flex-fill"><i class="fas fa-user text-muted mr-2" aria-hidden="true"></i>{{ user.username }}</a>
+                    {% if app.user and app.user.username == user.username %}<span class="badge badge-info">vous</span>{% endif %}
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">Aucun utilisateur.</li>
+            {% endfor %}
+        </ul>
     </div>
+</div>
 {% endblock %}

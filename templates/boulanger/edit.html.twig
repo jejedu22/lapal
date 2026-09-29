@@ -1,21 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Boulanger{% endblock %}
+{% block title %}Modifier un boulanger{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">{{ boulanger.prenom }} {{ boulanger.nom }}</h1>
+{% endblock %}
 
 {% block body %}
-   <div class="col-md-12">
+    <div class="col-12 col-lg-8 col-xl-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Modifier le boulanger : {{ boulanger.prenom }} {{ boulanger.nom }}</h3>
+                <h2 class="card-title">Modifier</h2>
                 <div class="card-tools">
-                        {{ include('boulanger/_delete_form.html.twig') }}    
-                </div>            
+                    {{ include('boulanger/_delete_form.html.twig') }}
+                </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
-
-                {{ include('boulanger/_form.html.twig', {'button_label': 'Valider'}) }}
-                <a href="{{ path('boulanger_index') }}"><i class="fas fa-angle-double-left"></i></a>
+                {{ include('boulanger/_form.html.twig') }}
             </div>
         </div>
     </div>

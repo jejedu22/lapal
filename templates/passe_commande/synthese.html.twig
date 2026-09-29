@@ -1,134 +1,120 @@
 {% extends 'base.html.twig' %}
-    {% block title %}
-        {% if suivi == 1 %}
-            Suivi de livrason
-        {% elseif suivi == 0 %}
-            Sythèse des commandes
-        {% else %}
-            Sythèse des commandes par date
-        {% endif %}
-    {% endblock %}
 
-    {% block titre_page %}
-        {% if suivi == 1 %}
-            <h3 class="s-0 text-dark">Suivi de livraison</h3>
-        {% elseif suivi == 0 %}
-            <h3 class="s-0 text-dark">Sythèse des commandes</h3>
-        {% else %}
-            <h3 class="s-0 text-dark">Toutes les commandes par date</h3>
-        {% endif %}
-    {% endblock %}
+{% set titre = suivi == 0 ? 'Commandes à venir' : 'Toutes les commandes' %}
 
-{% block stylesheets %}
-  <link rel="stylesheet" href="{{asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')}}">
-  <link rel="stylesheet" href="{{asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css')}}">
+{% block title %}{{ titre }}{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">{{ titre }}</h1>
+    {% if suivi == 2 %}<p class="text-muted mb-0">Les 100 derniers jours de distribution, du plus récent au plus ancien.</p>{% endif %}
 {% endblock %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
+{% endblock %}
 
 {% block body %}
-<div class="col-md-12">
-{% for jour_distrib in jour_distribs %}
-    {% if jour_distrib.date|date('Y-m-d') >= "now"|date('Y-m-d') or suivi == 1 or suivi == 2 %}
-        {% if suivi == 2 %}
-            <div class="card collapsed-card">
-        {% elseif suivi == 1 and jour_distrib.date|date('Y-m-d') != "now"|date('Y-m-d') %}
-            <div class="card collapsed-card">
-        {% else %}
-            <div class="card">
-        {% endif %}
-        <div class="card-header border-transparent">
-            <h3 class="card-title">{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</h3>
+<div class="col-12">
+{% for jour in jour_distribs %}
+    {% set nb = jour.commandes|length %}
+    {% set montant_jour = 0 %}
+    {% for commande in jour.commandes %}
+        {% for ligne in commande.ligneCommandes %}
+            {% set montant_jour = montant_jour + ligne.quantite * ligne.pain.prix %}
+        {% endfor %}
+    {% endfor %}
+    {# Toutes les commandes : seul le jour le plus proche est déplié #}
+    <div class="card{{ suivi == 2 and not loop.first ? ' collapsed-card' }}">
+        <div class="card-header">
+            <h2 class="card-title">
+                {{ jour.date|format_datetime('full', 'none', locale='fr')|capitalize }}
+                <small class="text-muted ml-1">
+                    {{ nb }} commande{{ nb > 1 ? 's' }} · {{ jour.poidsCommande|kg }} · {{ montant_jour|euros }}
+                </small>
+            </h2>
             <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
-            </button>
+                {% if is_granted('ROLE_USER') %}
+                    <a href="{{ path('jour_distrib_bon', {'id': jour.id}) }}" class="btn btn-tool" title="Bon de préparation"><i class="fas fa-print" aria-hidden="true"></i><span class="sr-only">Bon de préparation</span></a>
+                    <a href="{{ path('jour_distrib_export', {'id': jour.id}) }}" class="btn btn-tool" title="Export CSV"><i class="fas fa-file-csv" aria-hidden="true"></i><span class="sr-only">Export CSV</span></a>
+                {% endif %}
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" aria-label="Replier / déplier">
+                    <i class="fas {{ suivi == 2 and not loop.first ? 'fa-plus' : 'fa-minus' }}" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped table-sm table-bordered" id="tableau{{ jour_distrib.id }}">
+            {% if nb == 0 %}
+                <p class="text-muted m-3">Aucune commande pour ce jour.</p>
+            {% else %}
+                <table class="table table-striped table-sm tableau-commandes w-100" id="tableau{{ jour.id }}">
                     <thead>
                         <tr>
-                            <th>Nom</th>
-                            <th>Pain</th>
-                            <th>Prix</th>
-                            <th></th>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Pains</th>
+                            <th scope="col" class="text-right">Prix</th>
+                            {% if suivi == 2 %}<th scope="col">Livrée</th>{% endif %}
+                            <th scope="col"><span class="sr-only">Actions</span></th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% if jour_distrib.commandes is defined %}
-                        {% for commande in jour_distrib.commandes %}
-
-                            {% if commande.livree == null or suivi == 0 or suivi == 2 %}
-                                {% set total = 0 %}
-                                {% set somme = 0 %}
-                                <tr>
-                                    <td>{{ commande.prenom }} {{ commande.nom }}</br><i><small>{{ commande.commentaire }}</small></small></td>
-                                    <td>
-                                    {% for ligne_commande in commande.ligneCommandes %}
-                                        {% set somme = ligne_commande.quantite*ligne_commande.pain.prix %}
-                                        {% set total = total+somme %}
-                                        <p>{{ ligne_commande.quantite}} {{ ligne_commande.pain.nom }} - {{ ligne_commande.pain.poid }}kg </p>
-                                    {% endfor %}
-                                    </td>
-                                    <td>{{ total }} €</td>
-                                    <td>
-                                        {% if suivi == 1 %}
-                                            <a href="{{ path('livree_commande', { commandeId: commande.id }) }}" onclick="return confirm('Tu lui as vraiment donné son pain ?')"><i class="fas fa-check"></i></a>
-                                        {% else %}
-                                            {{ include('commande/_delete_form.html.twig') }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                    {% for commande in jour.commandes %}
+                        {% set total = 0 %}
+                        <tr>
+                            <td data-order="{{ commande.nom|lower }} {{ commande.prenom|lower }}">
+                                <strong>{{ commande.nom|upper }}</strong> {{ commande.prenom }}
+                                {% if commande.commentaire %}<br><small class="text-info"><i class="far fa-comment" aria-hidden="true"></i> {{ commande.commentaire }}</small>{% endif %}
+                            </td>
+                            <td>
+                                {% for ligne in commande.ligneCommandes %}
+                                    {% set total = total + ligne.quantite * ligne.pain.prix %}
+                                    <div>{{ ligne.quantite }} × {{ ligne.pain.nom }} <span class="text-muted">{{ ligne.pain.poid|kg }}</span></div>
+                                {% endfor %}
+                            </td>
+                            <td class="text-right text-nowrap" data-order="{{ total }}">{{ total|euros }}</td>
+                            {% if suivi == 2 %}
+                                <td>{% if commande.livree %}<i class="fas fa-check text-success" aria-label="Oui"></i>{% endif %}</td>
                             {% endif %}
-                        {% endfor %}
-                    {% endif %}
+                            <td class="text-right">
+                                {{ include('commande/_delete_form.html.twig', {'retour': app.request.requestUri}) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
-            </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 {% else %}
-    <div class="col-md-12">
-        <div class="callout callout-danger">
-            <h5>Ya pas de commande !</h5>
-
-            <p>Personne n'a passer de commande</p>
-        </div>
+    <div class="callout callout-info">
+        <h5>Aucune commande</h5>
+        <p class="mb-0">Aucune distribution à venir pour le moment.</p>
     </div>
 {% endfor %}
-
 </div>
 {% endblock %}
 
-{% block navbar %}
-
-{% endblock %}
-
 {% block javascripts %}
-<script src="{{asset('plugins/datatables/jquery.dataTables.min.js')}}"></script>
-<script src="{{asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
-<script src="{{asset('plugins/datatables-responsive/js/dataTables.responsive.min.js')}}"></script>
-<script src="{{asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js')}}"></script>
-{% for jour_distrib in jour_distribs %}
-    <script>
-    $(function () {
-        $('#tableau{{ jour_distrib.id }}').DataTable({
-        "paging": true,
-        "lengthChange": false,
-        "searching": true,
-        "ordering": true,
-        "info": true,
-        "autoWidth": false,
-        "responsive": true,
-        "language": {
-            "url": "/French.json"
-        },
-        "order": [[ 0, "asc" ]],
-        });
+<script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/dataTables.responsive.min.js') }}"></script>
+<script src="{{ asset('plugins/datatables-responsive/js/responsive.bootstrap4.min.js') }}"></script>
+<script>
+$(function () {
+    $('.tableau-commandes').DataTable({
+        paging: true,
+        pageLength: 25,
+        lengthChange: false,
+        searching: true,
+        ordering: true,
+        info: true,
+        autoWidth: false,
+        responsive: true,
+        language: { url: '{{ asset('French.json') }}' },
+        order: [[0, 'asc']],
+        columnDefs: [{ orderable: false, targets: -1 }]
     });
-    </script>
-{% endfor %}
+});
+</script>
 {% endblock %}

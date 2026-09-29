@@ -6,8 +6,9 @@ April: Avril
 May: Mai
 June: Juin
 July: Juillet
-Juillet: Août
+August: Août
 September: Septembre
+October: Octobre
 November: Novembre
 December: Décembre
 
@@ -19,7 +20,7 @@ Friday: Vendredi
 Saturday: Samedi
 Sunday: Dimanche
 
-delete_message: Es-tu sur de vouloir le supprimer ?
+delete_message: Es-tu sûr de vouloir le supprimer ?
 
 warning: Attention !!!
 success: C'est enregistré !

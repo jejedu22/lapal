@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\JourDistrib;
 use App\Entity\Pain;
 use App\Entity\Boulanger;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -19,53 +20,58 @@ class JourDistribType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('closed', CheckboxType::class, [
-            'label'    => 'Fermer la vente',
+            'label'    => 'Commandes fermées (les clients ne peuvent plus commander)',
             'required' => false,
         ]);
-        if ($options['edit']){
-            $builder
-                ->add('pains', EntityType::class, [
-                    'class' => Pain::class,
-                    'choice_label' => function (Pain $pain = null) {
-                        return $pain->getNom() . " - " . $pain->getPoid() . "kg";
-                    },
-                    'choice_value' => 'id',
-                    'multiple' => true,
-                    'expanded' => true,
-                ]);
+
+        $pains = [
+            'class' => Pain::class,
+            'label' => 'Pains proposés',
+            'choice_label' => function (Pain $pain) {
+                return $pain->getLibelle() . ($pain->getActif() ? '' : ' (archivé)');
+            },
+            'choice_value' => 'id',
+            'multiple' => true,
+            'expanded' => true,
+            'query_builder' => function (EntityRepository $er) use ($options) {
+                $qb = $er->createQueryBuilder('p')->orderBy('p.nom', 'ASC');
+                // un nouveau jour ne propose que les pains actifs ;
+                // en modification on garde aussi les pains archivés déjà cochés
+                if (!$options['edit']) {
+                    $qb->where('p.actif = true');
+                }
+
+                return $qb;
+            },
+        ];
+        if (!$options['edit']) {
+            $pains['choice_attr'] = function () {
+                return ['checked' => true];
+            };
         }
-        else {
-            $builder
-                ->add('pains', EntityType::class, [
-                    'class' => Pain::class,
-                    'choice_label' => function (Pain $pain = null) {
-                        return $pain->getNom() . " - " . $pain->getPoid() . "kg";
-                    },
-                    'choice_value' => 'id',
-                    'multiple' => true,
-                    'expanded' => true,
-                    'choice_attr' => function($val, $key, $index) {
-                        return array('checked' => true);
-                    },
-                ]);
-        }
+        $builder->add('pains', EntityType::class, $pains);
+
         $builder
             ->add('date', DateType::class, [
-                'label' => 'Date de Disribution ',
+                'label' => 'Date de distribution',
                 'widget' => 'single_text',
-                // 'attr' => ['class' => 'ui-datepicker'],
-                // 'format' => 'dd/MM/yyyy',
-                // 'html5' => false,
-                // 'model_timezone' => 'Europe/Paris',
             ])
-            ->add('total', NumberType::class,[
-                'label' => 'Poid total de la fournée (en kg)'
+            ->add('total', NumberType::class, [
+                'label' => 'Poids total de la fournée (kg)',
+                'html5' => true,
+                'attr' => ['min' => 0, 'step' => '0.5'],
             ])
-            ->add('boulanger', EntityType::class,[
+            ->add('boulanger', EntityType::class, [
                 'class' => Boulanger::class,
-                'choice_label' => 'prenom'
+                'choice_label' => function (Boulanger $boulanger) {
+                    return $boulanger->getPrenom() . ' ' . $boulanger->getNom();
+                },
             ])
-            ->add('commentaire')
+            ->add('commentaire', null, [
+                'label' => 'Lieu / information pour les clients',
+                'required' => false,
+                'attr' => ['placeholder' => 'Ex. : au local associatif, de 17 h à 19 h'],
+            ])
             ;
     }
 

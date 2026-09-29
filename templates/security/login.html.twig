@@ -1,58 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion!{% endblock %}
+{% block title %}Connexion{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Connexion de l’équipe</h1>
+{% endblock %}
 
 {% block body %}
-<div class="card-body login-card-body">
+<div class="col-12 col-sm-8 col-md-6 col-lg-4">
+    <div class="card">
+        <div class="card-body">
+            {% if app.user %}
+                <p>Vous êtes connecté en tant que <strong>{{ app.user.username }}</strong>.</p>
+                <a href="{{ path('app_logout') }}" class="btn btn-outline-secondary"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Se déconnecter</a>
+            {% else %}
+                <p class="text-muted">Espace réservé aux personnes qui organisent la distribution. Pour commander, <a href="{{ path('passe_commande_index') }}">c’est par ici</a>.</p>
+                <form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
 
-    <p class="login-box-msg">Connectez-vous</p>
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
-
-    {% if app.user %}
-        <div class="mb-3">
-            Vous êtes connecté {{ app.user.username }}, <a href="{{ path('app_logout') }}">Déconnexion</a>
+                    <div class="form-group">
+                        <label for="inputUsername">Identifiant</label>
+                        <div class="input-group">
+                            <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus>
+                            <div class="input-group-append"><span class="input-group-text"><i class="fas fa-user" aria-hidden="true"></i></span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword">Mot de passe</label>
+                        <div class="input-group">
+                            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+                            <div class="input-group-append"><span class="input-group-text"><i class="fas fa-lock" aria-hidden="true"></i></span></div>
+                        </div>
+                    </div>
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" name="_remember_me" id="rememberMe">
+                        <label class="custom-control-label font-weight-normal" for="rememberMe">Se souvenir de moi (30 jours)</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+                </form>
+            {% endif %}
         </div>
-    {% else %}
-        <div class="input-group mb-3">
-            <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" required autofocus>
-            <div class="input-group-append">
-                <div class="input-group-text">
-                <span class="fas fa-user"></span>
-                </div>
-            </div>
-        </div>
-        <div class="input-group mb-3">
-            <input type="password" name="password" id="inputPassword" class="form-control" required>
-            <div class="input-group-append">
-                <div class="input-group-text">
-                <span class="fas fa-lock"></span>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-          <!-- /.col -->
-          <div class="col-4">
-            <button type="submit" class="btn btn-primary btn-block">Connection</button>
-          </div>
-          <!-- /.col -->
-        </div>
-    {% endif %}
-
-    {#
-        Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-        See https://symfony.com/doc/current/security/remember_me.html
-
-    #}
-        <div class="checkbox mb-3">
-            <label>
-                <input type="checkbox" name="_remember_me"> Se souvenir de moi !
-            </label>
-        </div>
-
-</form>
+    </div>
 </div>
 {% endblock %}

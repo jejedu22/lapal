@@ -1,0 +1,37 @@
+{# lignes : quantités par pain (JourDistribRepository::findQuantitesParPain), jour : JourDistrib #}
+{% set total_quantite = 0 %}
+{% set total_poids = 0 %}
+{% set total_montant = 0 %}
+<table class="table table-sm table-striped mb-0">
+    <thead>
+        <tr>
+            <th scope="col">Pain</th>
+            <th scope="col" class="text-right">Quantité</th>
+            <th scope="col" class="text-right">Poids</th>
+            <th scope="col" class="text-right">Montant</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for ligne in lignes %}
+        {% set poids = ligne.quantite * ligne.poid %}
+        {% set montant = ligne.quantite * ligne.prix %}
+        {% set total_quantite = total_quantite + ligne.quantite %}
+        {% set total_poids = total_poids + poids %}
+        {% set total_montant = total_montant + montant %}
+        <tr>
+            <td>{{ ligne.nom }} <span class="text-muted">{{ ligne.poid|kg }}</span></td>
+            <td class="text-right font-weight-bold">{{ ligne.quantite }}</td>
+            <td class="text-right text-nowrap">{{ poids|kg }}</td>
+            <td class="text-right text-nowrap">{{ montant|euros }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr class="font-weight-bold">
+            <td>Total{% if jour.total %} <span class="text-muted font-weight-normal small">fournée de {{ jour.total|kg }}</span>{% endif %}</td>
+            <td class="text-right">{{ total_quantite }}</td>
+            <td class="text-right text-nowrap">{{ total_poids|kg }}</td>
+            <td class="text-right text-nowrap">{{ total_montant|euros }}</td>
+        </tr>
+    </tfoot>
+</table>
