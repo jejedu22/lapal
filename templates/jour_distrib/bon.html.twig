@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bon de préparation{% endblock %}
+
+{% block titre_page %}
+    <div class="d-flex flex-wrap align-items-center">
+        <div class="flex-fill">
+            <h1 class="h3 text-dark mb-0">Bon de préparation</h1>
+            <p class="mb-0">
+                <strong>{{ jour.date|format_datetime('full', 'none', locale='fr')|capitalize }}</strong>
+                {% if jour.boulanger %} · {{ jour.boulanger.prenom }} {{ jour.boulanger.nom }}{% endif %}
+                {% if jour.commentaire %} · {{ jour.commentaire }}{% endif %}
+            </p>
+        </div>
+        <div class="no-print mt-2">
+            <button type="button" class="btn btn-primary" onclick="window.print()"><i class="fas fa-print" aria-hidden="true"></i> Imprimer</button>
+            <a href="{{ path('jour_distrib_export', {'id': jour.id}) }}" class="btn btn-outline-secondary"><i class="fas fa-file-csv" aria-hidden="true"></i> CSV</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+<div class="col-12 col-xl-10">
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Pains à préparer</h2></div>
+        <div class="card-body p-0">
+            {% if lignes is empty %}
+                <p class="text-muted m-3">Aucune commande pour ce jour.</p>
+            {% else %}
+                {{ include('passe_commande/_tableau_poids.html.twig', {'lignes': lignes, 'jour': jour}) }}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Commandes ({{ commandes|length }})</h2></div>
+        <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 2.5rem"><span class="sr-only">Livrée</span>✓</th>
+                        <th scope="col">Nom</th>
+                        <th scope="col">Pains</th>
+                        <th scope="col" class="text-right">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for commande in commandes %}
+                    {% set total = 0 %}
+                    <tr>
+                        <td class="text-center">{{ commande.livree ? '☑' : '☐' }}</td>
+                        <td>
+                            <strong>{{ commande.nom|upper }}</strong> {{ commande.prenom }}
+                            {% if commande.commentaire %}<br><small><i>{{ commande.commentaire }}</i></small>{% endif %}
+                        </td>
+                        <td>
+                            {% for ligne in commande.ligneCommandes %}
+                                {% set total = total + ligne.quantite * ligne.pain.prix %}
+                                {{ ligne.quantite }} × {{ ligne.pain.nom }} {{ ligne.pain.poid|kg }}{{ not loop.last ? ', ' }}
+                            {% endfor %}
+                        </td>
+                        <td class="text-right text-nowrap">{{ total|euros }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="text-muted">Aucune commande.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="no-print"><a href="{{ path('jour_distrib_index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Retour aux jours de distribution</a></p>
+</div>
+{% endblock %}

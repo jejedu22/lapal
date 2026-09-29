@@ -1,57 +1,54 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Pain index{% endblock %}
+{% block title %}Pains{% endblock %}
 
 {% block titre_page %}
-{% endblock %}
-
-{% block body %}
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Liste des pains</h3>
-                <div class="card-tools">
-                    <a href="{{ path('pain_new') }}" class="btn btn-tool btn-sm">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                </div>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Nom</th>
-                            <th>Poid</th>
-                            <th>Prix</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for pain in pains %}
-                        
-                        <tr onclick="document.location = '{{ path('pain_edit', {'id': pain.id}) }}';">
-                            <td>{{ pain.id }}</td>
-                            <td>{{ pain.nom }}</td>
-                            <td>{{ pain.poid |number_format(2, ',', '.')}} kg</td>
-                            <td>{{ pain.prix |number_format(2, ',', '.')}} €</td>
-                        </tr>
-                        
-                    {% else %}
-                        <tr>
-                            <td colspan="5">Ya pas de pain ! </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-        
+    <h1 class="h3 text-dark mb-0">Pains</h1>
 {% endblock %}
 
 {% block navbar %}
     <li class="nav-item d-none d-sm-inline-block">
         <a href="{{ path('pain_new') }}" class="nav-link">Ajouter un pain</a>
     </li>
+{% endblock %}
+
+{% block body %}
+<div class="col-12 col-xl-8">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ pains|filter(p => p.actif)|length }} pain(s) en vente</h2>
+            <div class="card-tools">
+                <a href="{{ path('pain_new') }}" class="btn btn-success btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Ajouter un pain</a>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover table-lien mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Nom</th>
+                        <th scope="col" class="text-right">Poids</th>
+                        <th scope="col" class="text-right">Prix</th>
+                        <th scope="col" class="text-right">Prix au kg</th>
+                        <th scope="col">État</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for pain in pains %}
+                    <tr class="{{ pain.actif ? '' : 'text-muted' }}" onclick="location.href='{{ path('pain_edit', {'id': pain.id}) }}'">
+                        <td><a class="lien-ligne" href="{{ path('pain_edit', {'id': pain.id}) }}">{{ pain.nom }}</a></td>
+                        <td class="text-right text-nowrap">{{ pain.poid|kg }}</td>
+                        <td class="text-right text-nowrap">{{ pain.prix|euros }}</td>
+                        <td class="text-right text-nowrap">{{ pain.poid > 0 ? (pain.prix / pain.poid)|euros : '—' }}</td>
+                        <td>{% if pain.actif %}<span class="badge badge-success">En vente</span>{% else %}<span class="badge badge-secondary">Archivé</span>{% endif %}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-muted">Aucun pain pour l’instant. <a href="{{ path('pain_new') }}">Ajouter le premier</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,23 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Ajout d'un jour{% endblock %}
+{% block title %}Nouveau jour de distribution{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Nouveau jour de distribution</h1>
+{% endblock %}
 
 {% block body %}
-    <div class="col-md-12">
+    <div class="col-12 col-xl-8">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Ajout d'un jour de distribution</h3>
-            </div>
-            <!-- /.card-header -->
             <div class="card-body">
                 {{ include('jour_distrib/_form.html.twig') }}
-
-                <a href="{{ path('jour_distrib_index') }}"><i class="fas fa-angle-double-left"></i></a>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block javascripts %}
-
 {% endblock %}

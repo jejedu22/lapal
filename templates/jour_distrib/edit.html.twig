@@ -1,20 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier un jour{% endblock %}
+{% block title %}Modifier un jour de distribution{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">{{ jour_distrib.date|format_datetime('full', 'none', locale='fr')|capitalize }}</h1>
+    <p class="text-muted mb-0">{{ jour_distrib.commandes|length }} commande(s) · {{ jour_distrib.poidsCommande|kg }} commandés sur {{ jour_distrib.total|kg }}</p>
+{% endblock %}
 
 {% block body %}
-    <div class="col-md-12">
+    <div class="col-12 col-xl-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Modifier le {{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</h3>
+                <h2 class="card-title">Modifier</h2>
                 <div class="card-tools">
                     {{ include('jour_distrib/_delete_form.html.twig') }}
-                </div>            
+                </div>
             </div>
-            <!-- /.card-header -->
             <div class="card-body">
-                {{ include('jour_distrib/_form.html.twig', {'button_label': 'Update'}) }}
-                <a href="{{ path('jour_distrib_index') }}"><i class="fas fa-angle-double-left"></i></a>
+                {{ include('jour_distrib/_form.html.twig') }}
             </div>
         </div>
     </div>

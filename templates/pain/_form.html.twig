@@ -1,4 +1,10 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn btn-block btn-success">{{ button_label|default('Enregistrer') }}</button>
+    {{ form_row(form.nom) }}
+    <div class="form-row">
+        <div class="col-sm-6">{{ form_row(form.poid) }}</div>
+        <div class="col-sm-6">{{ form_row(form.prix) }}</div>
+    </div>
+    {{ form_rest(form) }}
+    <button class="btn btn-success">{{ button_label|default('Enregistrer') }}</button>
+    <a href="{{ path('pain_index') }}" class="btn btn-link">Annuler</a>
 {{ form_end(form) }}

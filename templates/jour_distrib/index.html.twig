@@ -1,47 +1,89 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Jours de distribution{% endblock %}
-{% block titre_page %}
-{% endblock %}
-{% block body %}
 
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Jours de distribution</h3>
-                <div class="card-tools">
-                    <a href="{{ path('jour_distrib_new') }}" class="btn btn-tool btn-sm">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                </div>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for jour_distrib in jour_distribs %}
-                        <tr onclick="document.location = '{{ path('jour_distrib_edit', {'id': jour_distrib.id}) }}';">
-                            <td>{{ jour_distrib.date|format_datetime('full', 'none', locale='fr') }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3">Fini le boulot !</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Jours de distribution</h1>
 {% endblock %}
 
 {% block navbar %}
     <li class="nav-item d-none d-sm-inline-block">
         <a href="{{ path('jour_distrib_new') }}" class="nav-link">Ajouter un jour</a>
     </li>
+{% endblock %}
+
+{% block body %}
+{% set statuts = {
+    'ouvert':     ['Ouvert', 'success'],
+    'complet':    ['Complet', 'warning'],
+    'ferme':      ['Fermé', 'secondary'],
+    'aujourdhui': ['Aujourd’hui', 'info'],
+    'passe':      ['Passé', 'light'],
+} %}
+<div class="col-12">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">{{ jour_distribs|length }} jour{{ jour_distribs|length > 1 ? 's' }}</h2>
+            <div class="card-tools">
+                <a href="{{ path('jour_distrib_new') }}" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Ajouter un jour
+                </a>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Boulanger</th>
+                        <th scope="col" style="min-width: 11rem">Remplissage</th>
+                        <th scope="col">Commandes</th>
+                        <th scope="col">État</th>
+                        <th scope="col" class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for jour in jour_distribs %}
+                    {% set statut = jour.statut %}
+                    <tr class="{{ statut == 'passe' ? 'text-muted' }}">
+                        <td class="text-nowrap">
+                            <a href="{{ path('jour_distrib_edit', {'id': jour.id}) }}">{{ jour.date|format_datetime('full', 'none', locale='fr')|capitalize }}</a>
+                            {% if jour.commentaire %}<br><small class="text-muted">{{ jour.commentaire }}</small>{% endif %}
+                        </td>
+                        <td>{{ jour.boulanger ? jour.boulanger.prenom ~ ' ' ~ jour.boulanger.nom : '—' }}</td>
+                        <td>
+                            <div class="small">{{ jour.poidsCommande|kg }} / {{ jour.total|kg }}</div>
+                            <div class="progress progress-xs" aria-hidden="true">
+                                <div class="progress-bar {{ jour.tauxRemplissage >= 100 ? 'bg-warning' : 'bg-success' }}" style="width: {{ jour.tauxRemplissage }}%"></div>
+                            </div>
+                        </td>
+                        <td>{{ jour.commandes|length }}</td>
+                        <td><span class="badge badge-{{ statuts[statut][1] }}">{{ statuts[statut][0] }}</span></td>
+                        <td class="text-right text-nowrap">
+                            {% if statut != 'passe' %}
+                                <form method="post" action="{{ path('jour_distrib_fermeture', {'id': jour.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('fermeture' ~ jour.id) }}">
+                                    {% if jour.closed %}
+                                        <button class="btn btn-sm btn-outline-success" title="Rouvrir les commandes"><i class="fas fa-lock-open" aria-hidden="true"></i> Rouvrir</button>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-secondary" title="Clore les commandes"><i class="fas fa-lock" aria-hidden="true"></i> Clore</button>
+                                    {% endif %}
+                                </form>
+                            {% endif %}
+                            <a href="{{ path('synthese_index', {'suivi': 1, 'jour': jour.id}) }}" class="btn btn-sm btn-outline-primary" title="Suivi des livraisons"><i class="fas fa-check-double" aria-hidden="true"></i><span class="sr-only">Suivi des livraisons</span></a>
+                            <a href="{{ path('jour_distrib_bon', {'id': jour.id}) }}" class="btn btn-sm btn-outline-primary" title="Bon de préparation"><i class="fas fa-print" aria-hidden="true"></i><span class="sr-only">Bon de préparation</span></a>
+                            <a href="{{ path('jour_distrib_export', {'id': jour.id}) }}" class="btn btn-sm btn-outline-primary" title="Export CSV"><i class="fas fa-file-csv" aria-hidden="true"></i><span class="sr-only">Export CSV</span></a>
+                            <a href="{{ path('jour_distrib_edit', {'id': jour.id}) }}" class="btn btn-sm btn-outline-secondary" title="Modifier"><i class="fas fa-pen" aria-hidden="true"></i><span class="sr-only">Modifier</span></a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-muted">Aucun jour de distribution. <a href="{{ path('jour_distrib_new') }}">En créer un</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

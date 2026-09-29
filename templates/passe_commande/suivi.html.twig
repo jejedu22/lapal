@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi des livraisons{% endblock %}
+
+{% block titre_page %}
+    <h1 class="h3 text-dark mb-0">Suivi des livraisons</h1>
+{% endblock %}
+
+{% block body %}
+<div class="col-12 col-lg-10 col-xl-8">
+    {% if jour is null %}
+        <div class="callout callout-warning">
+            <h5>Aucun jour de distribution</h5>
+            <p class="mb-0"><a href="{{ path('jour_distrib_new') }}">Créer un jour de distribution</a></p>
+        </div>
+    {% else %}
+        <form method="get" class="form-inline mb-3 no-print">
+            <label for="choix-jour" class="mr-2">Jour :</label>
+            <select id="choix-jour" name="jour" class="form-control flex-fill" onchange="this.form.submit()">
+                {% for j in jours %}
+                    <option value="{{ j.id }}"{{ j.id == jour.id ? ' selected' }}>
+                        {{ j.date|format_datetime('full', 'none', locale='fr')|capitalize }}{{ j.aujourdhui ? ' (aujourd’hui)' }} – {{ j.commandes|length }} cde(s)
+                    </option>
+                {% endfor %}
+            </select>
+            <noscript><button class="btn btn-secondary ml-2">Afficher</button></noscript>
+        </form>
+
+        {% set nb_livrees = commandes|filter(c => c.livree)|length %}
+        <div class="card" id="suivi" data-url="{{ path('livree_basculer', {'id': '__ID__'}) }}" data-token="{{ csrf_token('livree') }}">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span id="compteur-livrees">{{ nb_livrees }}</span> / {{ commandes|length }} livrée{{ commandes|length > 1 ? 's' }}
+                </h2>
+                <div class="card-tools">
+                    <a href="{{ path('jour_distrib_bon', {'id': jour.id}) }}" class="btn btn-tool" title="Bon de préparation"><i class="fas fa-print" aria-hidden="true"></i><span class="sr-only">Bon de préparation</span></a>
+                </div>
+            </div>
+            <div class="px-3 pt-3">
+                <div class="progress progress-sm mb-3" aria-hidden="true">
+                    <div class="progress-bar bg-success" id="barre-livrees" style="width: {{ commandes|length ? (nb_livrees * 100 / commandes|length)|round : 0 }}%"></div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center">
+                    <input type="search" id="recherche" class="form-control mb-2 mr-3 flex-fill" placeholder="Rechercher un nom…" aria-label="Rechercher un nom" style="max-width: 22rem">
+                    <div class="custom-control custom-switch mb-2">
+                        <input type="checkbox" class="custom-control-input" id="masquer-livrees">
+                        <label class="custom-control-label" for="masquer-livrees">Masquer les commandes livrées</label>
+                    </div>
+                </div>
+            </div>
+            <ul class="list-group list-group-flush" id="liste-suivi">
+                {% for commande in commandes %}
+                    {% set total = 0 %}
+                    <li class="list-group-item suivi-ligne{{ commande.livree ? ' livree' }}"
+                        data-id="{{ commande.id }}" data-nom="{{ (commande.prenom ~ ' ' ~ commande.nom ~ ' ' ~ commande.nom ~ ' ' ~ commande.prenom)|lower }}">
+                        <input type="checkbox" class="suivi-case" id="livree-{{ commande.id }}" {{ commande.livree ? 'checked' }}
+                               aria-label="{{ commande.prenom }} {{ commande.nom }} livrée">
+                        <label for="livree-{{ commande.id }}" class="flex-fill mb-0 font-weight-normal">
+                            <span class="suivi-nom font-weight-bold">{{ commande.nom|upper }} {{ commande.prenom }}</span>
+                            <span class="suivi-detail d-block">
+                                {% for ligne in commande.ligneCommandes %}
+                                    {% set total = total + ligne.quantite * ligne.pain.prix %}
+                                    {{ ligne.quantite }} × {{ ligne.pain.nom }} {{ ligne.pain.poid|kg }}{{ not loop.last ? ' · ' }}
+                                {% endfor %}
+                            </span>
+                            {% if commande.commentaire %}
+                                <span class="d-block small text-info"><i class="far fa-comment" aria-hidden="true"></i> {{ commande.commentaire }}</span>
+                            {% endif %}
+                        </label>
+                        <span class="text-nowrap font-weight-bold ml-2">{{ total|euros }}</span>
+                    </li>
+                {% else %}
+                    <li class="list-group-item text-muted">Aucune commande pour ce jour.</li>
+                {% endfor %}
+            </ul>
+            <div class="card-footer text-muted small d-none" id="aucun-resultat">Aucune commande ne correspond.</div>
+        </div>
+
+        {# Message temporaire avec « Annuler » après chaque coche #}
+        <div id="toast-suivi" class="alert alert-dark shadow d-none" role="status" aria-live="polite"
+             style="position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1080; min-width: 18rem;">
+            <span id="toast-texte"></span>
+            <button type="button" class="btn btn-sm btn-light ml-3" id="toast-annuler">Annuler</button>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+(function () {
+    var bloc = document.getElementById('suivi');
+    if (!bloc) { return; }
+    var liste = document.getElementById('liste-suivi');
+    var lignes = Array.prototype.slice.call(liste.querySelectorAll('.suivi-ligne'));
+    var toast = document.getElementById('toast-suivi');
+    var derniere = null, minuteur = null;
+
+    function majCompteur() {
+        var n = lignes.filter(function (l) { return l.classList.contains('livree'); }).length;
+        document.getElementById('compteur-livrees').textContent = n;
+        document.getElementById('barre-livrees').style.width = (lignes.length ? Math.round(n * 100 / lignes.length) : 0) + '%';
+    }
+
+    function filtrer() {
+        var q = document.getElementById('recherche').value.trim().toLowerCase();
+        var masquer = document.getElementById('masquer-livrees').checked;
+        var visibles = 0;
+        lignes.forEach(function (l) {
+            var ok = (!q || l.dataset.nom.indexOf(q) !== -1) && !(masquer && l.classList.contains('livree'));
+            l.classList.toggle('d-none', !ok);
+            if (ok) { visibles++; }
+        });
+        document.getElementById('aucun-resultat').classList.toggle('d-none', visibles > 0 || lignes.length === 0);
+    }
+
+    function enregistrer(ligne, livree) {
+        var caseLivree = ligne.querySelector('.suivi-case');
+        caseLivree.checked = livree;
+        ligne.classList.toggle('livree', livree);
+        majCompteur();
+        var donnees = new FormData();
+        donnees.append('_token', bloc.dataset.token);
+        donnees.append('livree', livree ? '1' : '0');
+        return fetch(bloc.dataset.url.replace('__ID__', ligne.dataset.id), { method: 'POST', body: donnees, credentials: 'same-origin' })
+            .then(function (r) { if (!r.ok) { throw new Error(); } return r.json(); })
+            .catch(function () {
+                // on revient à l'état précédent si l'enregistrement a échoué
+                caseLivree.checked = !livree;
+                ligne.classList.toggle('livree', !livree);
+                majCompteur();
+                alert('Impossible d’enregistrer. Vérifiez la connexion puis réessayez.');
+            });
+    }
+
+    function afficherToast(texte) {
+        document.getElementById('toast-texte').textContent = texte;
+        toast.classList.remove('d-none');
+        clearTimeout(minuteur);
+        minuteur = setTimeout(function () { toast.classList.add('d-none'); }, 6000);
+    }
+
+    liste.addEventListener('change', function (e) {
+        if (!e.target.classList.contains('suivi-case')) { return; }
+        var ligne = e.target.closest('.suivi-ligne');
+        var livree = e.target.checked;
+        derniere = { ligne: ligne, livree: livree };
+        enregistrer(ligne, livree).then(filtrer);
+        afficherToast(ligne.querySelector('.suivi-nom').textContent + (livree ? ' : livrée' : ' : non livrée'));
+    });
+
+    document.getElementById('toast-annuler').addEventListener('click', function () {
+        if (derniere) { enregistrer(derniere.ligne, !derniere.livree).then(filtrer); derniere = null; }
+        toast.classList.add('d-none');
+    });
+    document.getElementById('recherche').addEventListener('input', filtrer);
+    document.getElementById('masquer-livrees').addEventListener('change', filtrer);
+})();
+</script>
+{% endblock %}
