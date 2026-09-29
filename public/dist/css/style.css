@@ -162,3 +162,57 @@
 .nuancier__radio:checked + .nuancier__pastille { border-color: #fff; box-shadow: 0 0 0 3px #343a40; }
 .nuancier__radio:focus-visible + .nuancier__pastille { outline: 2px dashed #343a40; outline-offset: 3px; }
 .nuancier__apercu { display: inline-block; width: 4rem; height: 1rem; border-radius: .25rem; margin-top: .25rem; }
+
+/* ------------------------------------------------------------------ */
+/* Tableaux interactifs (dist/js/tableau.js)                           */
+/* ------------------------------------------------------------------ */
+.tableau-barre {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: .5rem 1rem; padding: .75rem 1rem;
+}
+.tableau-recherche { flex: 1 1 14rem; max-width: 22rem; }
+.tableau-vide { margin: 0; padding: 1rem; }
+.tableau-pagination { display: flex; justify-content: center; padding: .75rem 1rem; }
+.tableau-pagination .page-link { cursor: pointer; }
+.tableau-pagination .page-item.disabled .page-link { cursor: default; }
+
+.tableau-tri {
+    background: none; border: 0; padding: 0; margin: 0;
+    font: inherit; color: inherit; text-align: inherit; cursor: pointer;
+    display: inline-flex; align-items: center; gap: .35rem;
+}
+.tableau-tri::after {
+    content: "\f0dc"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+    font-size: .75em; opacity: .3;
+}
+th[aria-sort="ascending"] .tableau-tri::after { content: "\f0de"; opacity: .8; }
+th[aria-sort="descending"] .tableau-tri::after { content: "\f0dd"; opacity: .8; }
+.tableau-tri:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* Petit écran : chaque ligne devient une carte, libellé à gauche, valeur à droite */
+@media (max-width: 767.98px) {
+    table.tableau-cartes thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    table.tableau-cartes, table.tableau-cartes tbody, table.tableau-cartes tr, table.tableau-cartes td { display: block; width: 100%; }
+    table.tableau-cartes tr[hidden] { display: none; }
+    table.tableau-cartes tbody tr {
+        border-top: 1px solid #dee2e6; padding: .5rem 1rem;
+    }
+    table.tableau-cartes.table-striped tbody tr:nth-of-type(odd) { background-color: rgba(0,0,0,.03); }
+    table.tableau-cartes tbody td {
+        display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+        border: 0; padding: .2rem 0 !important; text-align: right !important;
+    }
+    table.tableau-cartes tbody td::before {
+        content: attr(data-label); flex-shrink: 0;
+        font-weight: 600; color: #6c757d; text-align: left;
+    }
+    table.tableau-cartes tbody td[data-label=""]::before { content: none; }
+    table.tableau-cartes tbody td[data-label=""] { justify-content: flex-end; }
+    /* La première cellule sert de titre de carte */
+    table.tableau-cartes tbody td:first-child { display: block; text-align: left !important; font-size: 1.05rem; }
+    table.tableau-cartes tbody td:first-child::before { content: none; }
+}
+@media print {
+    .tableau-barre, .tableau-pagination, .tableau-tri::after { display: none !important; }
+    table[data-tableau] tbody tr[hidden] { display: table-row !important; }
+}
