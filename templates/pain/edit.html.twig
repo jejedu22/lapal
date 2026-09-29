@@ -19,5 +19,17 @@
                 {{ include('pain/_form.html.twig') }}
             </div>
         </div>
+
+        {% if nb_commandes > 0 %}
+            <div class="callout callout-warning">
+                <h5><i class="fas fa-exclamation-triangle text-warning" aria-hidden="true"></i> Avant de supprimer ce pain</h5>
+                <p>
+                    Il figure dans <strong>{{ nb_commandes }} commande{{ nb_commandes > 1 ? 's' }}</strong>{% if nb_commandes_a_venir > 0 %},
+                    dont <strong>{{ nb_commandes_a_venir }} pour une distribution à venir</strong>{% endif %}.
+                    Le supprimer supprime aussi {{ nb_commandes > 1 ? 'ces commandes' : 'cette commande' }} en entier, avec {{ nb_commandes > 1 ? 'leurs' : 'ses' }} autres pains.
+                </p>
+                <p class="mb-0 text-muted">Pour simplement ne plus le proposer en gardant l’historique, décochez plutôt « Proposé à la vente ».</p>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
