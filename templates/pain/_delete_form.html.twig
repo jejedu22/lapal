@@ -1,5 +1,17 @@
+{# Variables : pain, nb_commandes et nb_commandes_a_venir (commandes supprimées avec le pain) #}
+{% set nb = nb_commandes ?? 0 %}
+{% set a_venir = nb_commandes_a_venir ?? 0 %}
+{% if nb > 1 %}
+    {% set question = 'Supprimer définitivement « ' ~ pain.nom ~ ' » et les ' ~ nb ~ ' commandes qui le contiennent'
+        ~ (a_venir > 0 ? ' (dont ' ~ a_venir ~ ' à venir)' : '') ~ ' ? Les autres pains de ces commandes seront supprimés aussi. Cette action est irréversible.' %}
+{% elseif nb == 1 %}
+    {% set question = 'Supprimer définitivement « ' ~ pain.nom ~ ' » et la commande' ~ (a_venir > 0 ? ' à venir' : '') ~ ' qui le contient'
+        ~ ' ? Les autres pains de cette commande seront supprimés aussi. Cette action est irréversible.' %}
+{% else %}
+    {% set question = 'Supprimer définitivement « ' ~ pain.nom ~ ' » ?' %}
+{% endif %}
 <form method="post" action="{{ path('pain_delete', {'id': pain.id}) }}" class="d-inline"
-      onsubmit="return confirm('Supprimer définitivement ce pain ?')">
+      onsubmit="return confirm('{{ question|e('js') }}')">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ pain.id) }}">
     <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt" aria-hidden="true"></i> Supprimer</button>

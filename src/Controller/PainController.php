@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Commande;
 use App\Entity\Pain;
 use App\Form\PainType;
 use App\Repository\PainRepository;
@@ -96,9 +97,15 @@ class PainController extends AbstractController
             return $this->redirectToRoute('pain_index');
         }
 
+        $commandes = $this->commandesDuPain($pain);
+
         return $this->render('pain/edit.html.twig', [
             'pain' => $pain,
             'form' => $form->createView(),
+            'nb_commandes' => count($commandes),
+            'nb_commandes_a_venir' => count(array_filter($commandes, function (Commande $commande) {
+                return 'passe' !== $commande->getJourDistrib()->getStatut();
+            })),
         ]);
     }
 
@@ -108,26 +115,59 @@ class PainController extends AbstractController
     public function delete(Request $request, Pain $pain): Response
     {
         if ($this->isCsrfTokenValid('delete'.$pain->getId(), $request->request->get('_token'))) {
-            // Un pain déjà commandé ne peut pas être supprimé : on propose de l'archiver
-            if (!$pain->getLigneCommandes()->isEmpty()) {
-                $this->addFlash('warning', sprintf('« %s » figure dans des commandes : il ne peut pas être supprimé. Décochez « Proposé à la vente » pour l’archiver.', $pain->getNom()));
+            $entityManager = $this->getDoctrine()->getManager();
 
-                return $this->redirectToRoute('pain_edit', ['id' => $pain->getId()]);
+            // Les commandes contenant ce pain sont supprimées entièrement (avec leurs autres pains) ;
+            // le poids déjà commandé de leur jour est diminué d'autant
+            $commandes = $this->commandesDuPain($pain);
+            foreach ($commandes as $commande) {
+                $poids = 0.0;
+                foreach ($commande->getLigneCommandes() as $ligne) {
+                    $poids += $ligne->getPain()->getPoid() * $ligne->getQuantite();
+                }
+                $jourDistrib = $commande->getJourDistrib();
+                $jourDistrib->setPoidRestant(max(0.0, round($jourDistrib->getPoidsCommande() - $poids, 3)));
+                $entityManager->remove($commande);
+            }
+            // Lignes isolées (sans commande) : supprimées aussi, sinon elles bloqueraient la suppression
+            foreach ($pain->getLigneCommandes() as $ligne) {
+                if (null === $ligne->getCommande()) {
+                    $entityManager->remove($ligne);
+                }
             }
 
-            $entityManager = $this->getDoctrine()->getManager();
             foreach ($pain->getJourDistribs()->toArray() as $jourDistrib) {
                 $pain->removeJourDistrib($jourDistrib);
             }
             $entityManager->remove($pain);
             try {
                 $entityManager->flush();
-                $this->addFlash('success', sprintf('Le pain « %s » a été supprimé.', $pain->getNom()));
+                $this->addFlash('success', count($commandes)
+                    ? sprintf('Le pain « %s » a été supprimé, ainsi que %d commande%s qui le contenai%s.', $pain->getNom(), count($commandes), count($commandes) > 1 ? 's' : '', count($commandes) > 1 ? 'ent' : 't')
+                    : sprintf('Le pain « %s » a été supprimé.', $pain->getNom()));
             } catch (ForeignKeyConstraintViolationException $e) {
                 $this->addFlash('warning', 'Ce pain est encore utilisé : archivez-le plutôt.');
             }
         }
 
         return $this->redirectToRoute('pain_index');
+    }
+
+    /**
+     * Commandes contenant ce pain (chacune une seule fois).
+     *
+     * @return Commande[]
+     */
+    private function commandesDuPain(Pain $pain): array
+    {
+        $commandes = [];
+        foreach ($pain->getLigneCommandes() as $ligne) {
+            $commande = $ligne->getCommande();
+            if (null !== $commande) {
+                $commandes[$commande->getId()] = $commande;
+            }
+        }
+
+        return array_values($commandes);
     }
 }
