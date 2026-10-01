@@ -4,6 +4,9 @@ services:
     image: lapal:latest
     container_name: lapal-app
     restart: unless-stopped
+    # Serveur 2 CPU / 4 Go partagé : memory_limit PHP = 256M, opcache = 128M
+    mem_limit: 320m
+    cpus: 1.0
     depends_on:
       db:
         condition: service_healthy
@@ -36,12 +39,19 @@ services:
     image: mariadb:10.11
     container_name: lapal-db
     restart: unless-stopped
+    mem_limit: 256m
+    cpus: 1.0
     environment:
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD manquant}
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD manquant}
-    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      # Empreinte mémoire réduite (défaut : 128 Mo de buffer pool, 151 connexions)
+      - --innodb-buffer-pool-size=64M
+      - --max-connections=50
     volumes:
       - db:/var/lib/mysql
     healthcheck:

@@ -23,6 +23,7 @@ RUN set -eux; \
 
 COPY docker/php/php.ini $PHP_INI_DIR/conf.d/zz-lapal.ini
 COPY docker/apache/vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/apache/mpm_prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 
 WORKDIR /var/www/html
 
