@@ -1,18 +1,25 @@
 framework:
     secret: '%env(APP_SECRET)%'
-    #csrf_protection: true
-    #http_method_override: true
+    csrf_protection: true
+    # Les formulaires de suppression envoient _method=DELETE
+    http_method_override: true
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
     session:
-        enabled: true
-        # handler_id: null
-        cookie_secure: auto
-        cookie_samesite: lax
         handler_id: 'session.handler.native_file'
         save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
-    #esi: true
-    #fragments: true
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    # Derrière Traefik : X-Forwarded-For / -Proto / -Port (pas X-Forwarded-Host)
+    trusted_proxies: '%env(default::TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']
+    trusted_hosts: '%env(default::TRUSTED_HOSTS)%'
+
     php_errors:
         log: true
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

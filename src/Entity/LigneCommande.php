@@ -2,33 +2,24 @@
 
 namespace App\Entity;
 
+use App\Repository\LigneCommandeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\LigneCommandeRepository")
- */
+#[ORM\Entity(repositoryClass: LigneCommandeRepository::class)]
 class LigneCommande
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
     
-    /**
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Column(type: 'integer')]
     private $quantite;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Commande", inversedBy="ligneCommandes", cascade={"persist"})
-     */
+    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'ligneCommandes', cascade: ['persist'])]
     private $commande;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Pain", inversedBy="ligneCommandes", cascade={"persist"})
-     */
+    #[ORM\ManyToOne(targetEntity: Pain::class, inversedBy: 'ligneCommandes', cascade: ['persist'])]
     private $pain;
 
     public function getId(): ?int

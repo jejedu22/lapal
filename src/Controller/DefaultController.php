@@ -12,22 +12,25 @@ use App\Repository\JourDistribRepository;
 use App\Service\OptionsSettings;
 use App\Twig\AppExtension;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class DefaultController extends AbstractController
 {
     /** Quantité maximale d'un même pain dans une commande */
     const QUANTITE_MAX = 20;
 
-    /**
-     * @Route("/", name="passe_commande_index", methods={"GET"})
-     */
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
+    }
+
+    #[Route('/', name: 'passe_commande_index', methods: ['GET'])]
     public function index(JourDistribRepository $jourDistribRepository): Response
     {
         return $this->render('passe_commande/index.html.twig', [
@@ -39,9 +42,8 @@ class DefaultController extends AbstractController
      * suivi = 0 : commandes à venir (public)
      * suivi = 1 : suivi des livraisons d'un jour
      * suivi = 2 : toutes les commandes, par date
-     *
-     * @Route("/synthese/{suivi}", name="synthese_index", methods={"GET"}, requirements={"suivi"="\d+"})
      */
+    #[Route('/synthese/{suivi}', name: 'synthese_index', methods: ['GET'], requirements: ['suivi' => '\d+'])]
     public function synthese(Request $request, JourDistribRepository $jourDistribRepository, int $suivi): Response
     {
         if (1 === $suivi) {
@@ -99,9 +101,8 @@ class DefaultController extends AbstractController
 
     /**
      * Conservé pour les anciens liens : marque la commande livrée puis revient au suivi.
-     *
-     * @Route("/livree/{commandeId}", name="livree_commande", methods={"GET"})
      */
+    #[Route('/livree/{commandeId}', name: 'livree_commande', methods: ['GET'])]
     public function livreeCommande(CommandeRepository $commandeRepository, int $commandeId): Response
     {
         $commande = $commandeRepository->find($commandeId);
@@ -109,7 +110,7 @@ class DefaultController extends AbstractController
             throw $this->createNotFoundException('Commande introuvable');
         }
         $commande->setLivree(true);
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
 
         return $this->redirectToRoute('synthese_index', [
             'suivi' => 1,
@@ -119,9 +120,8 @@ class DefaultController extends AbstractController
 
     /**
      * Coche / décoche « livrée » depuis l'écran de suivi, sans recharger la page.
-     *
-     * @Route("/livree/{id}/basculer", name="livree_basculer", methods={"POST"})
      */
+    #[Route('/livree/{id}/basculer', name: 'livree_basculer', methods: ['POST'])]
     public function basculerLivree(Request $request, Commande $commande): JsonResponse
     {
         if (!$this->isCsrfTokenValid('livree', $request->request->get('_token'))) {
@@ -129,14 +129,12 @@ class DefaultController extends AbstractController
         }
 
         $commande->setLivree('1' === $request->request->get('livree'));
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
 
         return new JsonResponse(['id' => $commande->getId(), 'livree' => $commande->getLivree()]);
     }
 
-    /**
-     * @Route("/synthesepoids", name="synthese_poids", methods={"GET"})
-     */
+    #[Route('/synthesepoids', name: 'synthese_poids', methods: ['GET'])]
     public function synthesePoids(JourDistribRepository $jourDistribRepository): Response
     {
         $jours = $jourDistribRepository->findAllOrder('DESC');
@@ -148,9 +146,7 @@ class DefaultController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/new/{idJourDistrib}", name="passe_commande_new", methods={"GET","POST"})
-     */
+    #[Route('/new/{idJourDistrib}', name: 'passe_commande_new', methods: ['GET','POST'])]
     public function new(Request $request, int $idJourDistrib, JourDistribRepository $jourDistribRepository): Response
     {
         $jourDistrib = $jourDistribRepository->find($idJourDistrib);
@@ -177,9 +173,7 @@ class DefaultController extends AbstractController
         return $this->formulaireCommande($request, $commande, true);
     }
 
-    /**
-     * @Route("/commande/{id}/edit", name="commande_edit", methods={"GET","POST"})
-     */
+    #[Route('/commande/{id}/edit', name: 'commande_edit', methods: ['GET','POST'])]
     public function edit(Request $request, Commande $commande): Response
     {
         $jourDistrib = $commande->getJourDistrib();
@@ -226,7 +220,7 @@ class DefaultController extends AbstractController
 
         $quantites = $quantitesActuelles;
         if ($form->isSubmitted()) {
-            $saisie = $request->request->get('quantites', []);
+            $saisie = $request->request->all('quantites');
             $quantites = [];
             foreach ($pains as $idPain => $pain) {
                 $q = isset($saisie[$idPain]) ? (int) $saisie[$idPain] : 0;
@@ -250,12 +244,11 @@ class DefaultController extends AbstractController
             }
 
             if ($form->isValid()) {
-                $entityManager = $this->getDoctrine()->getManager();
 
                 // On remplace les lignes existantes par les nouvelles quantités
                 foreach ($commande->getLigneCommandes()->toArray() as $ligne) {
                     $commande->removeLigneCommande($ligne);
-                    $entityManager->remove($ligne);
+                    $this->entityManager->remove($ligne);
                 }
                 foreach ($quantites as $idPain => $q) {
                     if ($q > 0) {
@@ -269,8 +262,8 @@ class DefaultController extends AbstractController
                 // poidRestant = poids total déjà commandé pour ce jour
                 $jourDistrib->setPoidRestant(round($jourDistrib->getPoidsCommande() - $poidsActuel + $poidsCommande, 3));
 
-                $entityManager->persist($commande);
-                $entityManager->flush();
+                $this->entityManager->persist($commande);
+                $this->entityManager->flush();
 
                 $response = $this->redirectToRoute('commande_index');
                 $response->headers->setCookie(new Cookie('commande', json_encode([
@@ -313,9 +306,8 @@ class DefaultController extends AbstractController
 
     /**
      * Manifeste pour « Ajouter à l'écran d'accueil » sur téléphone.
-     *
-     * @Route("/manifest.webmanifest", name="app_manifest", methods={"GET"})
      */
+    #[Route('/manifest.webmanifest', name: 'app_manifest', methods: ['GET'])]
     public function manifest(Request $request, OptionsSettings $options): JsonResponse
     {
         $base = $request->getBasePath();

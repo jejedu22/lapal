@@ -5,21 +5,18 @@ namespace App\Controller;
 use App\Entity\JourDistrib;
 use App\Form\JourDistribType;
 use App\Repository\JourDistribRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route("/jour/distrib")
- */
+#[Route('/jour/distrib')]
 class JourDistribController extends AbstractController
 {
-    /**
-     * @Route("/", name="jour_distrib_index", methods={"GET"})
-     */
+    #[Route('/', name: 'jour_distrib_index', methods: ['GET'])]
     public function index(JourDistribRepository $jourDistribRepository): Response
     {
         return $this->render('jour_distrib/index.html.twig', [
@@ -27,17 +24,13 @@ class JourDistribController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/new", name="jour_distrib_new", methods={"GET","POST"})
-     */
-    public function new(Request $request): Response
+    #[Route('/new', name: 'jour_distrib_new', methods: ['GET','POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $jourDistrib = new JourDistrib();
         $form = $this->createForm(JourDistribType::class, $jourDistrib);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($jourDistrib);
             $entityManager->flush();
             $this->addFlash('success', 'Le jour de distribution a été créé.');
@@ -51,10 +44,8 @@ class JourDistribController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="jour_distrib_edit", methods={"GET","POST"})
-     */
-    public function edit(Request $request, JourDistrib $jourDistrib): Response
+    #[Route('/{id}/edit', name: 'jour_distrib_edit', methods: ['GET','POST'])]
+    public function edit(Request $request, JourDistrib $jourDistrib, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(JourDistribType::class, $jourDistrib, [
             'edit' => true, 
@@ -62,7 +53,7 @@ class JourDistribController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Le jour de distribution a été modifié.');
 
             return $this->redirectToRoute('jour_distrib_index');
@@ -74,13 +65,10 @@ class JourDistribController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="jour_distrib_delete", methods={"DELETE"})
-     */
-    public function delete(Request $request, JourDistrib $jourDistrib): Response
+    #[Route('/{id}', name: 'jour_distrib_delete', methods: ['DELETE'])]
+    public function delete(Request $request, JourDistrib $jourDistrib, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$jourDistrib->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($jourDistrib);
             $entityManager->flush();
             $this->addFlash('success', 'Le jour de distribution a été supprimé.');
@@ -91,14 +79,13 @@ class JourDistribController extends AbstractController
 
     /**
      * Ouvre ou ferme les commandes d'un jour depuis la liste.
-     *
-     * @Route("/{id}/fermeture", name="jour_distrib_fermeture", methods={"POST"})
      */
-    public function basculerFermeture(Request $request, JourDistrib $jourDistrib): Response
+    #[Route('/{id}/fermeture', name: 'jour_distrib_fermeture', methods: ['POST'])]
+    public function basculerFermeture(Request $request, JourDistrib $jourDistrib, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('fermeture'.$jourDistrib->getId(), $request->request->get('_token'))) {
             $jourDistrib->setClosed(!$jourDistrib->getClosed());
-            $this->getDoctrine()->getManager()->flush();
+            $entityManager->flush();
             $this->addFlash('success', $jourDistrib->getClosed() ? 'Les commandes sont fermées pour ce jour.' : 'Les commandes sont rouvertes pour ce jour.');
         }
 
@@ -107,9 +94,8 @@ class JourDistribController extends AbstractController
 
     /**
      * Bon de préparation imprimable : quantités par pain + liste des commandes.
-     *
-     * @Route("/{id}/bon", name="jour_distrib_bon", methods={"GET"})
      */
+    #[Route('/{id}/bon', name: 'jour_distrib_bon', methods: ['GET'])]
     public function bon(JourDistrib $jourDistrib, JourDistribRepository $jourDistribRepository): Response
     {
         return $this->render('jour_distrib/bon.html.twig', [
@@ -121,9 +107,8 @@ class JourDistribController extends AbstractController
 
     /**
      * Export CSV (séparateur « ; », UTF-8 avec BOM pour Excel) : une ligne par pain commandé.
-     *
-     * @Route("/{id}/export.csv", name="jour_distrib_export", methods={"GET"})
      */
+    #[Route('/{id}/export.csv', name: 'jour_distrib_export', methods: ['GET'])]
     public function export(JourDistrib $jourDistrib): Response
     {
         $commandes = $this->commandesTriees($jourDistrib);

@@ -4,57 +4,42 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Repository\PainRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\PainRepository")
- */
+#[ORM\Entity(repositoryClass: PainRepository::class)]
 class Pain
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type: 'float')]
     private $poid;
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type: 'float')]
     private $prix;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\LigneCommande", mappedBy="pain", cascade={"persist"})
-     */
+    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'pain', cascade: ['persist'])]
     private $ligneCommandes;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\JourDistrib", mappedBy="pains")
-     */
+    #[ORM\ManyToMany(targetEntity: JourDistrib::class, mappedBy: 'pains')]
     private $jourDistribs;
 
     /**
      * Un pain archivé n'est plus proposé pour les nouveaux jours de distribution.
-     *
-     * @ORM\Column(type="boolean", options={"default": true})
      */
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
     private $actif = true;
 
     /**
      * Rang d'affichage, choisi dans l'administration (le plus petit en premier).
-     *
-     * @ORM\Column(type="integer", options={"default": 0})
      */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private $position = 0;
 
     public function __construct()

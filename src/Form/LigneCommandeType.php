@@ -15,12 +15,12 @@ use Symfony\Component\Form\Extension\Core\DataTransformer\IntegerToLocalizedStri
 class LigneCommandeType extends AbstractType
 {
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('pain', EntityType::class, [
                 'class' => Pain::class,
-                'choice_label' => function (Pain $pain = null) {
+                'choice_label' => function (?Pain $pain) {
                     return $pain->getNom() . " - " . $pain->getPoid() . " kg" . " - " . $pain->getPrix() . " €";
                 },
                 'choice_value' => 'id',
@@ -38,7 +38,7 @@ class LigneCommandeType extends AbstractType
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => LigneCommande::class,

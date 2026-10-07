@@ -4,59 +4,40 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Repository\JourDistribRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\JourDistribRepository")
- */
+#[ORM\Entity(repositoryClass: JourDistribRepository::class)]
 class JourDistrib
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="date")
-     */
+    #[ORM\Column(type: 'date')]
     private $date;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Pain", inversedBy="jourDistribs")
-     * @ORM\OrderBy({"position" = "ASC", "nom" = "ASC"})
-     */
+    #[ORM\ManyToMany(targetEntity: Pain::class, inversedBy: 'jourDistribs')]
+    #[ORM\OrderBy(['position' => \SortDirection::Ascending, 'nom' => \SortDirection::Ascending])]
     private $pains;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Commande", mappedBy="jourDistrib", cascade={"persist", "remove"})
-     */
+    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'jourDistrib', cascade: ['persist', 'remove'])]
     private $commandes;
 
-    /**
-     * @ORM\Column(type="float")
-     */
+    #[ORM\Column(type: 'float')]
     private $total;
 
-    /**
-     * @ORM\Column(type="float", nullable=true)
-     */
+    #[ORM\Column(type: 'float', nullable: true)]
     private $poidRestant;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $closed;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Boulanger", inversedBy="jourDistribs")
-     */
+    #[ORM\ManyToOne(targetEntity: Boulanger::class, inversedBy: 'jourDistribs')]
     private $boulanger;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $commentaire;
 
     public function __construct()

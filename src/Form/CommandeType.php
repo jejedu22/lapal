@@ -34,7 +34,7 @@ class CommandeType extends AbstractType
     }
 
     
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['client']) {
             // Parcours client : les quantités par pain sont saisies à part (quantites[idPain])
@@ -44,14 +44,14 @@ class CommandeType extends AbstractType
                     'required' => true,
                     'attr' => ['autocomplete' => 'given-name'],
                     'empty_data' => '',
-                    'constraints' => [new NotBlank(['message' => 'Indiquez votre prénom.']), new Length(['max' => 255])],
+                    'constraints' => [new NotBlank(message: 'Indiquez votre prénom.'), new Length(max: 255)],
                 ])
                 ->add('nom', TextType::class, [
                     'label' => 'Nom',
                     'required' => true,
                     'attr' => ['autocomplete' => 'family-name'],
                     'empty_data' => '',
-                    'constraints' => [new NotBlank(['message' => 'Indiquez votre nom.']), new Length(['max' => 255])],
+                    'constraints' => [new NotBlank(message: 'Indiquez votre nom.'), new Length(max: 255)],
                 ])
                 ->add('commentaire', TextareaType::class, [
                     'label' => 'Commentaire pour le boulanger',
@@ -100,7 +100,7 @@ class CommandeType extends AbstractType
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Commande::class,
