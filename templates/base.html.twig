@@ -22,10 +22,15 @@
         <link rel="manifest" href="{{ path('app_manifest') }}">
         <meta name="theme-color" content="{{ couleur_hex(couleur) }}">
         {% if logo %}
-            <link rel="icon" type="image/png" href="{{ asset('uploads/logo/' ~ logo) }}">
+            <link rel="icon" href="{{ asset('uploads/logo/' ~ logo) }}">
             <link rel="apple-touch-icon" href="{{ asset('uploads/logo/' ~ logo) }}">
+        {% else %}
+            <link rel="icon" type="image/png" href="{{ asset('icons/favicon-32.png') }}">
+            <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
         {% endif %}
+        <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="{{ nom_appli }}">
     </head>
     <body class="hold-transition sidebar-mini layout-fixed">
@@ -148,5 +153,13 @@
         <script src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
         <script src="{{ asset('dist/js/tableau.js') }}"></script>
         {% block javascripts %}{% endblock %}
+        <script>
+            // Application installable (PWA) : cache des fichiers statiques et page hors connexion
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () {
+                    navigator.serviceWorker.register('{{ asset('sw.js') }}');
+                });
+            }
+        </script>
     </body>
 </html>

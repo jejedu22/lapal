@@ -316,23 +316,32 @@ class DefaultController extends AbstractController
      *
      * @Route("/manifest.webmanifest", name="app_manifest", methods={"GET"})
      */
-    public function manifest(OptionsSettings $options): JsonResponse
+    public function manifest(Request $request, OptionsSettings $options): JsonResponse
     {
+        $base = $request->getBasePath();
         $nom = $options->get('name', 'Lapal');
         $couleur = AppExtension::couleurHex($options->get('color', 'orange'));
         $manifest = [
+            'id' => $base . '/',
             'name' => $nom,
             'short_name' => $nom,
+            'description' => 'Commande de pain en ligne',
             'start_url' => $this->generateUrl('passe_commande_index'),
+            'scope' => $base . '/',
             'display' => 'standalone',
+            'orientation' => 'portrait',
             'background_color' => '#f4f6f9',
             'theme_color' => $couleur,
             'lang' => 'fr',
+            'icons' => [
+                ['src' => $base . '/icons/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => $base . '/icons/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => $base . '/icons/maskable-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ],
         ];
         if ($logo = $options->get('logo')) {
-            $manifest['icons'] = [
-                ['src' => '/uploads/logo/' . $logo, 'sizes' => 'any', 'type' => 'image/png', 'purpose' => 'any'],
-            ];
+            // Le logo personnalisé passe en priorité ; les icônes par défaut restent en secours
+            array_unshift($manifest['icons'], ['src' => $base . '/uploads/logo/' . $logo, 'sizes' => 'any', 'purpose' => 'any']);
         }
 
         $response = new JsonResponse($manifest);
