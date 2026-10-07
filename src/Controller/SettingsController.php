@@ -5,21 +5,18 @@ namespace App\Controller;
 use App\Entity\Settings;
 use App\Form\SettingsType;
 use App\Repository\SettingsRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\File;
 
-/**
- * @Route("/settings")
- */
+#[Route('/settings')]
 class SettingsController extends AbstractController
 {
-    /**
-     * @Route("/", name="settings_index", methods={"GET"})
-     */
+    #[Route('/', name: 'settings_index', methods: ['GET'])]
     public function index(SettingsRepository $settingsRepository): Response
     {
         return $this->render('settings/index.html.twig', [
@@ -28,10 +25,8 @@ class SettingsController extends AbstractController
     }
 
 
-    /**
-     * @Route("/{id}/edit", name="settings_edit", methods={"GET","POST"})
-     */
-    public function edit(Request $request, Settings $setting): Response
+    #[Route('/{id}/edit', name: 'settings_edit', methods: ['GET','POST'])]
+    public function edit(Request $request, Settings $setting, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(SettingsType::class, $setting);
         $form->handleRequest($request);
@@ -65,7 +60,7 @@ class SettingsController extends AbstractController
             if ($form->get('name')->getData() == 'contact_email') {
                 $setting->setValue($form->get('value')->getData());
             }
-            $this->getDoctrine()->getManager()->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Le paramètre a été mis à jour.');
 
             return $this->redirectToRoute('settings_index');

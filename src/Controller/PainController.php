@@ -7,20 +7,17 @@ use App\Entity\Pain;
 use App\Form\PainType;
 use App\Repository\PainRepository;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route("/pain")
- */
+#[Route('/pain')]
 class PainController extends AbstractController
 {
-    /**
-     * @Route("/", name="pain_index", methods={"GET"})
-     */
+    #[Route('/', name: 'pain_index', methods: ['GET'])]
     public function index(PainRepository $painRepository): Response
     {
         return $this->render('pain/index.html.twig', [
@@ -30,16 +27,15 @@ class PainController extends AbstractController
 
     /**
      * Enregistre l'ordre d'affichage des pains (liste d'identifiants, du premier au dernier).
-     *
-     * @Route("/ordre", name="pain_ordre", methods={"POST"})
      */
-    public function ordre(Request $request, PainRepository $painRepository): JsonResponse
+    #[Route('/ordre', name: 'pain_ordre', methods: ['POST'])]
+    public function ordre(Request $request, PainRepository $painRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         if (!$this->isCsrfTokenValid('ordre-pains', $request->request->get('_token'))) {
             return new JsonResponse(['erreur' => 'Jeton invalide, rechargez la page.'], Response::HTTP_FORBIDDEN);
         }
 
-        $ids = array_map('intval', (array) $request->request->get('ordre', []));
+        $ids = array_map('intval', $request->request->all('ordre'));
         $pains = [];
         foreach ($painRepository->findBy(['id' => $ids]) as $pain) {
             $pains[$pain->getId()] = $pain;
@@ -50,15 +46,13 @@ class PainController extends AbstractController
                 $pains[$id]->setPosition(++$rang);
             }
         }
-        $this->getDoctrine()->getManager()->flush();
+        $entityManager->flush();
 
         return new JsonResponse(['ok' => true]);
     }
 
-    /**
-     * @Route("/new", name="pain_new", methods={"GET","POST"})
-     */
-    public function new(Request $request, PainRepository $painRepository): Response
+    #[Route('/new', name: 'pain_new', methods: ['GET','POST'])]
+    public function new(Request $request, PainRepository $painRepository, EntityManagerInterface $entityManager): Response
     {
         $pain = new Pain();
         // Un nouveau pain arrive en fin de liste
@@ -68,7 +62,6 @@ class PainController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($pain);
             $entityManager->flush();
             $this->addFlash('success', sprintf('Le pain « %s » a été ajouté.', $pain->getNom()));
@@ -82,16 +75,14 @@ class PainController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="pain_edit", methods={"GET","POST"})
-     */
-    public function edit(Request $request, Pain $pain): Response
+    #[Route('/{id}/edit', name: 'pain_edit', methods: ['GET','POST'])]
+    public function edit(Request $request, Pain $pain, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(PainType::class, $pain);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $entityManager->flush();
             $this->addFlash('success', sprintf('Le pain « %s » a été modifié.', $pain->getNom()));
 
             return $this->redirectToRoute('pain_index');
@@ -109,13 +100,10 @@ class PainController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="pain_delete", methods={"DELETE"})
-     */
-    public function delete(Request $request, Pain $pain): Response
+    #[Route('/{id}', name: 'pain_delete', methods: ['DELETE'])]
+    public function delete(Request $request, Pain $pain, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$pain->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
 
             // Les commandes contenant ce pain sont supprimées entièrement (avec leurs autres pains) ;
             // le poids déjà commandé de leur jour est diminué d'autant

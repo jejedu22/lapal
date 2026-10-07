@@ -6,7 +6,7 @@
 Internet ──443──▶ traefik (dépôt jejedu22/traefik, réseau "proxy")
                       │  Host(`LAPAL_HOST`) + TLS Let's Encrypt + middleware default@file
                       ▼
-                lapal-app  (PHP 7.4 + Apache, port 80, réseaux "proxy" et "lapal")
+                lapal-app  (PHP 8.3 + Apache, port 80, réseaux "proxy" et "lapal")
                       │
                       ▼
                 lapal-db   (MariaDB 10.11, réseau "lapal" uniquement)
@@ -15,7 +15,7 @@ Internet ──443──▶ traefik (dépôt jejedu22/traefik, réseau "proxy")
 | Fichier | Rôle |
 |---|---|
 | `Dockerfile` | Image multi-étapes : extensions PHP, dépendances Composer (`--no-dev`), image finale Apache |
-| `docker/entrypoint.sh` | Au démarrage : droits, cache Symfony, `assets:install`, migrations Doctrine |
+| `docker/entrypoint.sh` | Au démarrage : droits, cache Symfony, `assets:install`, reprise de l'historique puis migrations Doctrine |
 | `docker/apache/vhost.conf` | DocumentRoot `public/`, `.htaccess` de `symfony/apache-pack` |
 | `docker/php/php.ini` | Fuseau Europe/Paris, OPcache, taille d'upload |
 | `docker-compose.yml` | Services `app` + `db`, volumes, labels Traefik |
@@ -42,7 +42,7 @@ docker compose --env-file .env.docker logs -f app
 ```bash
 docker compose --env-file .env.docker exec -T db \
   sh -c 'mariadb -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" "$MARIADB_DATABASE"' < dump.sql
-docker compose --env-file .env.docker restart app   # rejoue les migrations manquantes
+docker compose --env-file .env.docker restart app   # reprend l'historique puis joue les migrations manquantes
 ```
 
 Et pour le logo déjà uploadé :
@@ -57,19 +57,38 @@ docker compose --env-file .env.docker exec app chown -R www-data:www-data public
 `/register` est réservé aux utilisateurs connectés, il faut donc créer le premier compte à la main :
 
 ```bash
-docker compose --env-file .env.docker exec app php bin/console security:encode-password
+docker compose --env-file .env.docker exec app php bin/console security:hash-password
 # copier le hash obtenu, puis :
 docker compose --env-file .env.docker exec db sh -c \
   'mariadb -u"$MARIADB_USER" -p"$MARIADB_PASSWORD" "$MARIADB_DATABASE" -e \
    "INSERT INTO user (username, roles, password) VALUES (\"admin\", \"[]\", \"<HASH>\")"'
 ```
 
+## Passage de Symfony 4.4 à Symfony 7.4
+
+- **Historique des migrations** : Doctrine Migrations 3 n'utilise plus la table `migration_versions`
+  mais `doctrine_migration_versions`, avec le nom complet des classes. Au démarrage, l'entrypoint lance
+  `app:migrations:reprise`, qui recopie l'historique puis supprime l'ancienne table ; sans cela,
+  toutes les migrations seraient rejouées. La commande ne fait rien quand il n'y a plus d'ancienne table.
+  Avec `RUN_MIGRATIONS=0`, la lancer à la main avant `doctrine:migrations:migrate`.
+- **Sauvegarde** : faire un dump de la base avant le premier démarrage de la nouvelle image.
+- `doctrine:schema:validate` signale les colonnes `commande.nom`, `commande.prenom` et `pain.nom`
+  (en utf8mb4 dans des tables en utf8mb3, héritage des premières migrations). C'est sans conséquence ;
+  ne pas lancer `doctrine:schema:update --force`, qui les repasserait en utf8mb3.
+
+## Tests
+
+```bash
+composer install
+php bin/phpunit
+```
+
+Les tests utilisent une base SQLite jetable (`var/test.db`, voir `.env.test`) : aucun serveur requis.
+
 ## Remarques
 
-- **PHP 7.4** : imposé par le `composer.lock` (Symfony 4.4.7, doctrine/orm 2.7…). Il est en fin de vie ;
-  une montée en PHP 8 passe par un `composer update` (et idéalement Symfony 5.4/6.4).
-- Le lock contient des plugins Composer 1 (`symfony/flex` 1.6, `ocramius/package-versions` 1.4) :
-  l'image installe avec Composer 2 en `--no-plugins --ignore-platform-req=composer-plugin-api`.
+- **Symfony 7.4 LTS** (maintenu jusqu'en novembre 2028, correctifs de sécurité jusqu'en novembre 2029),
+  Doctrine ORM 3 / DBAL 4, PHP 8.3.
 - `TRUSTED_PROXIES` couvre les réseaux privés Docker pour que Symfony prenne en compte
   `X-Forwarded-Proto` envoyé par Traefik (cookies `secure`, URLs en https).
 - La base n'est jamais exposée sur le réseau `proxy` ni sur un port de l'hôte.

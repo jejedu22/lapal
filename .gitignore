@@ -19,7 +19,7 @@ yarn-error.log
 /public/uploads/
 /.env.docker
 
-###> phpunit ###
+###> phpunit/phpunit ###
+/phpunit.xml
 /.phpunit.cache/
-/.phpunit.result.cache
-###< phpunit ###
+###< phpunit/phpunit ###

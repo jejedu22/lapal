@@ -15,6 +15,8 @@ if [ "$1" = "apache2-foreground" ]; then
     console assets:install public
 
     if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+        # Base créée avant Symfony 7.4 : reprise de l'historique des migrations (ne fait rien ensuite)
+        console app:migrations:reprise
         console doctrine:migrations:migrate --allow-no-migration
     fi
 fi

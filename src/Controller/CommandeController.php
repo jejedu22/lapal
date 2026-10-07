@@ -4,24 +4,23 @@ namespace App\Controller;
 
 use App\Entity\Commande;
 use App\Repository\CommandeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * La création et la modification d'une commande sont dans DefaultController
  * (routes passe_commande_new et commande_edit).
- *
- * @Route("/commande")
  */
+#[Route('/commande')]
 class CommandeController extends AbstractController
 {
     /**
      * Récapitulatif de la dernière commande passée sur cet appareil (cookie « commande »).
-     *
-     * @Route("/", name="commande_index", methods={"GET"})
      */
+    #[Route('/', name: 'commande_index', methods: ['GET'])]
     public function index(Request $request, CommandeRepository $commandeRepository): Response
     {
         $cookie = json_decode((string) $request->cookies->get('commande'));
@@ -45,10 +44,8 @@ class CommandeController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="commande_delete", methods={"DELETE"})
-     */
-    public function delete(Request $request, Commande $commande): Response
+    #[Route('/{id}', name: 'commande_delete', methods: ['DELETE'])]
+    public function delete(Request $request, Commande $commande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$commande->getId(), $request->request->get('_token'))) {
             $poidCommande = 0;
@@ -58,8 +55,6 @@ class CommandeController extends AbstractController
 
             $jourDistrib = $commande->getJourDistrib();
             $jourDistrib->setPoidRestant(round($jourDistrib->getPoidsCommande() - $poidCommande, 3));
-
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($commande);
             $entityManager->flush();
 

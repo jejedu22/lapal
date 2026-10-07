@@ -1,18 +1,16 @@
 <?php
 namespace App\Service;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 
 class OptionsSettings
 {
-    /** @var \PDO */
-    private $db;
-    private $em;
+    private Connection $db;
 
     public function __construct(EntityManagerInterface $em)
     {
-        $this->em = $em;
-        $this->db = $this->em->getConnection();
+        $this->db = $em->getConnection();
     }
 
     /**
@@ -21,9 +19,7 @@ class OptionsSettings
      */
     public function get(string $name, $default=''): string
     {
-            $stmt = $this->db->prepare("SELECT `value` FROM `settings` WHERE `name`=?;");
-            $stmt->execute([$name]);
-            return $stmt->fetchColumn() ?: $default;
+        return $this->db->fetchOne('SELECT `value` FROM `settings` WHERE `name` = ?', [$name]) ?: $default;
     }
 
     /**
@@ -32,8 +28,7 @@ class OptionsSettings
      */
     public function set(string $name, string $value)
     {
-        $this->db->prepare("INSERT INTO settings (`name`, `value`) VALUES (?,?) ON DUPLICATE KEY UPDATE `value`=?;")
-            ->execute([$name, $value, $value]);
+        $this->db->executeStatement('INSERT INTO settings (`name`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?', [$name, $value, $value]);
     }
 
     public function getObfuscatedEmailAddress($email)

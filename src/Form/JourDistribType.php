@@ -17,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 class JourDistribType extends AbstractType
 {
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('closed', CheckboxType::class, [
             'label'    => 'Commandes fermées (les clients ne peuvent plus commander)',
@@ -34,7 +34,7 @@ class JourDistribType extends AbstractType
             'multiple' => true,
             'expanded' => true,
             'query_builder' => function (EntityRepository $er) use ($options) {
-                $qb = $er->createQueryBuilder('p')->orderBy('p.position', 'ASC')->addOrderBy('p.nom', 'ASC');
+                $qb = $er->createQueryBuilder('p')->orderBy('p.position', \SortDirection::Ascending)->addOrderBy('p.nom', \SortDirection::Ascending);
                 // un nouveau jour ne propose que les pains actifs ;
                 // en modification on garde aussi les pains archivés déjà cochés
                 if (!$options['edit']) {
@@ -75,7 +75,7 @@ class JourDistribType extends AbstractType
             ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => JourDistrib::class,

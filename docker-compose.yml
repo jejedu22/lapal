@@ -14,7 +14,7 @@ services:
       APP_ENV: prod
       APP_DEBUG: "0"
       APP_SECRET: ${APP_SECRET:?APP_SECRET manquant}
-      DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?serverVersion=mariadb-10.11.0&charset=utf8mb4
+      DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?serverVersion=10.11.0-MariaDB&charset=utf8mb4
       # Traefik est sur un réseau Docker privé : on lui fait confiance pour X-Forwarded-*
       # (nécessaire pour que Symfony sache qu'il est servi en HTTPS : cookies, redirections…)
       TRUSTED_PROXIES: 127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16

@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegistrationFormType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('username', null, [
@@ -25,9 +25,7 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Je confirme la création de ce compte d’équipe',
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => 'Cocher la case !',
-                    ]),
+                    new IsTrue(message: 'Cocher la case !'),
                 ],
             ])
             ->add('plainPassword', PasswordType::class, [
@@ -38,21 +36,19 @@ class RegistrationFormType extends AbstractType
                 // this is read and encoded in the controller
                 'mapped' => false,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Entrer un mot de passe',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères',
+                    new NotBlank(message: 'Entrer un mot de passe'),
+                    new Length(
+                        min: 6,
+                        minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères',
                         // max length allowed by Symfony for security reasons
-                        'max' => 4096,
-                    ]),
+                        max: 4096,
+                    ),
                 ],
             ])
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,

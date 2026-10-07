@@ -5,19 +5,16 @@ namespace App\Controller;
 use App\Entity\LigneCommande;
 use App\Form\LigneCommandeType;
 use App\Repository\LigneCommandeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route("/ligne/commande")
- */
+#[Route('/ligne/commande')]
 class LigneCommandeController extends AbstractController
 {
-    /**
-     * @Route("/", name="ligne_commande_index", methods={"GET"})
-     */
+    #[Route('/', name: 'ligne_commande_index', methods: ['GET'])]
     public function index(LigneCommandeRepository $ligneCommandeRepository): Response
     {
         return $this->render('ligne_commande/index.html.twig', [
@@ -25,17 +22,14 @@ class LigneCommandeController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/new", name="ligne_commande_new", methods={"GET","POST"})
-     */
-    public function new(Request $request): Response
+    #[Route('/new', name: 'ligne_commande_new', methods: ['GET','POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $ligneCommande = new LigneCommande();
         $form = $this->createForm(LigneCommandeType::class, $ligneCommande);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($ligneCommande);
             $entityManager->flush();
 
@@ -48,16 +42,14 @@ class LigneCommandeController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}/edit", name="ligne_commande_edit", methods={"GET","POST"})
-     */
-    public function edit(Request $request, LigneCommande $ligneCommande): Response
+    #[Route('/{id}/edit', name: 'ligne_commande_edit', methods: ['GET','POST'])]
+    public function edit(Request $request, LigneCommande $ligneCommande, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LigneCommandeType::class, $ligneCommande);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $entityManager->flush();
 
             return $this->redirectToRoute('ligne_commande_index');
         }
@@ -68,10 +60,8 @@ class LigneCommandeController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="ligne_commande_delete", methods={"DELETE"})
-     */
-    public function delete(Request $request, LigneCommande $ligneCommande): Response
+    #[Route('/{id}', name: 'ligne_commande_delete', methods: ['DELETE'])]
+    public function delete(Request $request, LigneCommande $ligneCommande, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$ligneCommande->getId(), $request->request->get('_token'))) {
 
@@ -83,8 +73,6 @@ class LigneCommandeController extends AbstractController
             $poidRestant -= $poidLigneCommande;
 
             $poidRestant = $ligneCommande->getCommande()->getJourDistrib()->setPoidRestant($poidRestant);
-
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($ligneCommande);
             $entityManager->flush();
         }

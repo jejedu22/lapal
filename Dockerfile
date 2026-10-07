@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Symfony 4.4 + dépendances verrouillées (doctrine/orm 2.7, dbal 2.10…) :
-# PHP 8 n'est pas supporté par le composer.lock actuel, on reste donc sur PHP 7.4.
-ARG PHP_VERSION=7.4
+# Symfony 7.4 LTS : PHP 8.2 minimum (les tests tournent en PHP 8.3)
+ARG PHP_VERSION=8.3
 
 ########################################
 # Image de base : PHP + Apache + extensions
@@ -38,16 +37,14 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY composer.json composer.lock symfony.lock ./
 
-# Le lock contient symfony/flex 1.6 et ocramius/package-versions 1.4 qui exigent
-# l'API plugin de Composer 1 : on installe avec Composer 2 sans plugins ni scripts
-# (les "auto-scripts" de Flex sont rejoués à la main plus bas / au démarrage).
+# Plugins autorisés (symfony/flex, symfony/runtime : ce dernier génère vendor/autoload_runtime.php) ;
+# les "auto-scripts" (cache, assets) sont joués au démarrage par l'entrypoint.
 RUN composer install \
-        --no-dev --no-scripts --no-plugins --no-progress --no-interaction \
-        --prefer-dist --optimize-autoloader \
-        --ignore-platform-req=composer-plugin-api
+        --no-dev --no-scripts --no-progress --no-interaction \
+        --prefer-dist --optimize-autoloader
 
 COPY . .
-RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-plugins --no-scripts
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts
 
 ########################################
 # Image finale

@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints\File;
 
 class SettingsType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('name', HiddenType::class,[])
@@ -59,13 +59,13 @@ class SettingsType extends AbstractType
                     'mapped' => false,
                     'required' => false,
                     'constraints' => [
-                        new File([
-                            'maxSize' => '100k',
-                            'mimeTypes' => [
+                        new File(
+                            maxSize: '100k',
+                            mimeTypes: [
                                 'image/png',
                             ],
-                            'mimeTypesMessage' => 'Télécharger un fichier PNG valide',
-                        ])
+                            mimeTypesMessage: 'Télécharger un fichier PNG valide',
+                        )
                     ],
                     'label' => 'Choisir un fichier',
                 ]);
@@ -90,7 +90,7 @@ class SettingsType extends AbstractType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Settings::class,
