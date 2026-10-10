@@ -32,7 +32,7 @@ services:
       - traefik.http.routers.lapal.rule=Host(`${LAPAL_HOST}`)
       - traefik.http.routers.lapal.entrypoints=websecure
       - traefik.http.routers.lapal.tls.certresolver=letsencrypt
-      - traefik.http.routers.lapal.middlewares=default@file
+      - traefik.http.routers.lapal.middlewares=custom-errors@docker,default@file
       - traefik.http.services.lapal.loadbalancer.server.port=80
 
   db:
