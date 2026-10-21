@@ -116,7 +116,8 @@ class JourDistribController extends AbstractController
         $response = new StreamedResponse(function () use ($commandes) {
             $sortie = fopen('php://output', 'w');
             fwrite($sortie, "\xEF\xBB\xBF");
-            fputcsv($sortie, ['Nom', 'Prénom', 'Pain', 'Poids unitaire (kg)', 'Quantité', 'Prix unitaire (€)', 'Montant (€)', 'Livrée', 'Commentaire'], ';');
+            // escape: '' = CSV standard (RFC 4180), sans caractère d'échappement propre à PHP
+            fputcsv($sortie, ['Nom', 'Prénom', 'Pain', 'Poids unitaire (kg)', 'Quantité', 'Prix unitaire (€)', 'Montant (€)', 'Livrée', 'Commentaire'], ';', escape: '');
             foreach ($commandes as $commande) {
                 foreach ($commande->getLignesTriees() as $ligne) {
                     $pain = $ligne->getPain();
@@ -130,7 +131,7 @@ class JourDistribController extends AbstractController
                         number_format($pain->getPrix() * $ligne->getQuantite(), 2, ',', ''),
                         $commande->getLivree() ? 'oui' : 'non',
                         (string) $commande->getCommentaire(),
-                    ], ';');
+                    ], ';', escape: '');
                 }
             }
             fclose($sortie);

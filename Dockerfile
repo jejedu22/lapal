@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Symfony 7.4 LTS : PHP 8.2 minimum (les tests tournent en PHP 8.3)
-ARG PHP_VERSION=8.3
+# Symfony 7.4 LTS sous PHP 8.4 (version imposée par composer.json)
+ARG PHP_VERSION=8.4
 
 ########################################
 # Image de base : PHP + Apache + extensions

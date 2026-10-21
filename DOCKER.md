@@ -6,7 +6,7 @@
 Internet ──443──▶ traefik (dépôt jejedu22/traefik, réseau "proxy")
                       │  Host(`LAPAL_HOST`) + TLS Let's Encrypt + middleware default@file
                       ▼
-                lapal-app  (PHP 8.3 + Apache, port 80, réseaux "proxy" et "lapal")
+                lapal-app  (PHP 8.4 + Apache, port 80, réseaux "proxy" et "lapal")
                       │
                       ▼
                 lapal-db   (MariaDB 10.11, réseau "lapal" uniquement)
@@ -88,7 +88,7 @@ Les tests utilisent une base SQLite jetable (`var/test.db`, voir `.env.test`) : 
 ## Remarques
 
 - **Symfony 7.4 LTS** (maintenu jusqu'en novembre 2028, correctifs de sécurité jusqu'en novembre 2029),
-  Doctrine ORM 3 / DBAL 4, PHP 8.3.
+  Doctrine ORM 3 / DBAL 4, PHP 8.4.
 - `TRUSTED_PROXIES` couvre les réseaux privés Docker pour que Symfony prenne en compte
   `X-Forwarded-Proto` envoyé par Traefik (cookies `secure`, URLs en https).
 - La base n'est jamais exposée sur le réseau `proxy` ni sur un port de l'hôte.
