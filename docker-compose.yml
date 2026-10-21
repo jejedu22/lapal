@@ -1,6 +1,9 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      # Toujours télécharger la dernière image PHP (correctifs de sécurité)
+      pull: true
     image: lapal:latest
     container_name: lapal-app
     restart: unless-stopped

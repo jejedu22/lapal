@@ -1,12 +1,19 @@
 # syntax=docker/dockerfile:1
 
-# Symfony 7.4 LTS sous PHP 8.4 (version imposée par composer.json)
+# Symfony 7.4 LTS sous PHP 8.4 (version imposée par composer.json).
+# Tag flottant : chaque reconstruction (docker compose build, avec pull: true) prend le dernier correctif.
 ARG PHP_VERSION=8.4
+# Plus ancien correctif accepté : la construction échoue en dessous (failles critiques
+# CVE-2026-109618 / CVE-2026-109619 corrigées en 8.4.27)
+ARG PHP_MIN_VERSION=8.4.27
 
 ########################################
 # Image de base : PHP + Apache + extensions
 ########################################
 FROM php:${PHP_VERSION}-apache AS base
+ARG PHP_MIN_VERSION
+
+RUN php -r 'if (version_compare(PHP_VERSION, $argv[1], "<")) { fwrite(STDERR, "PHP ".PHP_VERSION." trop ancien (minimum $argv[1]) : reconstruire avec --pull\n"); exit(1); }' "${PHP_MIN_VERSION}"
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 
