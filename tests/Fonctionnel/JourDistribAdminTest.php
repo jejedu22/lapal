@@ -143,4 +143,20 @@ class JourDistribAdminTest extends FonctionnelTestCase
         $this->assertSame('Curie;Marie;Campagne;1;2;4,50;9,00;oui;"Bien cuit"', $lignes[1]);
         $this->assertSame('Curie;Marie;Seigle;0,5;1;3,00;3,00;oui;"Bien cuit"', $lignes[2]);
     }
+
+    public function testExportCsvEchappeLesGuillemetsSelonLaNorme(): void
+    {
+        $pain = $this->creerPain('Campagne', 1, 4.5, 1);
+        $jour = $this->creerJour('2030-06-15', 20, [$pain], $this->creerBoulanger());
+        $commande = $this->creerCommande($jour, 'Marie', 'Curie', [[$pain, 1]], false);
+        $commande->setCommentaire('Porte "B\\", code 12');
+        $this->em->flush();
+
+        ob_start();
+        $this->client->request('GET', '/jour/distrib/'.$jour->getId().'/export.csv');
+        $contenu = ob_get_clean() ?: $this->client->getInternalResponse()->getContent();
+
+        // RFC 4180 : guillemets doublés, l'antislash n'a pas de rôle particulier
+        $this->assertStringContainsString(';non;"Porte ""B\\"", code 12"', $contenu);
+    }
 }
