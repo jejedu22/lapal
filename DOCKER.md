@@ -89,6 +89,10 @@ Les tests utilisent une base SQLite jetable (`var/test.db`, voir `.env.test`) : 
 
 - **Symfony 7.4 LTS** (maintenu jusqu'en novembre 2028, correctifs de sécurité jusqu'en novembre 2029),
   Doctrine ORM 3 / DBAL 4, PHP 8.4.
+- **Correctifs PHP** : l'image part du tag flottant `php:8.4-apache` et le compose force son
+  téléchargement (`pull: true`) : reconstruire l'image suffit à prendre le dernier correctif de sécurité.
+  La construction échoue si PHP est plus ancien que `PHP_MIN_VERSION` (8.4.27, failles critiques
+  CVE-2026-109618 / CVE-2026-109619). Vérifier la version en service : `docker exec lapal-app php -v`.
 - `TRUSTED_PROXIES` couvre les réseaux privés Docker pour que Symfony prenne en compte
   `X-Forwarded-Proto` envoyé par Traefik (cookies `secure`, URLs en https).
 - La base n'est jamais exposée sur le réseau `proxy` ni sur un port de l'hôte.
